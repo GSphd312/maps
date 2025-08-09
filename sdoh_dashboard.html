@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive Dashboards of Diabetes by Dr. Brian Chen</title>
+<style>
+  :root{--ink:#1f2a44;--accent:#4b6bfb;--bg:#f6f8ff;--card:#ffffff;--muted:#5b6b8c}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;color:#1a1a1a;background:var(--bg)}
+  header{background:linear-gradient(135deg,var(--ink),#2d3b66);color:#fff;padding:1.25rem 1rem 1.5rem;;text-align:center}
+  header h1{margin:0 0 .5rem;font-weight:700;letter-spacing:.2px}
+  header p{margin:0;opacity:.9}
+  nav{position:sticky;top:0;background:#fff;border-bottom:1px solid #e6e9f8;z-index:10000}
+  nav .inner{max-width:1500px;margin:0 auto;padding:8px 16px;display:flex;gap:8px;flex-wrap:wrap}
+  nav a{text-decoration:none;color:#1f2a44;padding:8px 12px;border-radius:10px}
+  nav a:hover{background:#eef2ff}
+  main{max-width:1500px;margin:0 auto;padding:28px 16px}
+  .panel{background:var(--card);border:1px solid #e0e6ff;border-radius:16px;box-shadow:0 10px 28px rgba(32,48,96,.08);padding:20px;margin:18px 0}
+  .panel{scroll-margin-top:96px}
+  h2{color:var(--ink);margin:4px 0 10px}
+  p.lead{color:var(--muted);margin-top:0}
+  /* --- Bullet cards for Part 1 --- */
+  .bullet-cards{display:grid;gap:16px;margin:14px 0 18px}
+  @media (min-width: 900px){.bullet-cards{grid-template-columns:repeat(3,1fr)}}
+  .bullet-card{background:var(--card);border:1px solid #e1e6ff;border-radius:14px;padding:16px;box-shadow:0 6px 16px rgba(32,48,96,.06)}
+  .bullet-card h3{margin:.2rem 0 .5rem;color:var(--ink);font-size:1.05rem}
+  .bullet-card h3 .dot{margin-right:.5ch}
+  .bullet-card p{margin:.3rem 0 0;color:#334169}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin:.25rem 0 1rem}
+  .btn{appearance:none;border:1px solid #cbd5ff;background:#fff;padding:.5rem .8rem;border-radius:10px;cursor:pointer;font-size:.95rem;text-decoration:none;color:#1f2a44}
+  .btn:hover{border-color:#aab6ff}
+  .frame{position:relative;width:1500px;max-width:100%;border:1px solid #d6ddff;border-radius:12px;overflow:hidden;background:#fff;margin:auto}
+  iframe{width:100%;height:100%;border:0;position:relative;z-index:1}
+  .note{font-size:.95rem;color:#3b477a;margin-top:10px}
+  details{background:#fff;border:1px solid #e1e6ff;border-radius:14px;padding:14px}
+  details[open]{box-shadow:0 8px 24px rgba(32,48,96,.06)}
+  summary{cursor:pointer;font-weight:700;color:#1f2a44}
+  footer{padding:28px 16px;text-align:center;color:#5d6a8a}
+</style>
+</head>
+<body>
+<header>
+  <h1>Uncovering the Factors of Diabetes:<br>A Multi-Level SDOH Analysis Using AI and Geospatial Techniques</h1>
+   <p style="font-weight:500; font-size:1rem; margin-top:0.5rem;">Brian Chen, PhD, MS, MSAS</p>
+</header>
+
+<nav>
+  <div class="inner">
+    <a href="#overview">Overview</a>
+    <a href="#national">National Dashboard</a>
+    <a href="#bridge">Bridge</a>
+    <a href="#illinois">Illinois Dashboard</a>
+    <a href="#conclusion">Conclusion</a>
+  </div>
+</nav>
+
+<main>
+  <section class="panel" id="overview">
+    <h2>Overview</h2>
+    <p class="lead">Our project explores diabetes in the United States and Illinois through a two-part data analysis. We move from a high-level, data-driven perspective to actionable, local insights. We start with a national view using AI and then transition to a focused geospatial analysis of Illinois.</p>
+  </section>
+
+  <section class="panel" id="national">
+    <h2>Part 1: National View - AI and Environmental Factors</h2>
+    <p class="lead">
+      This dashboard highlights the social and environmental factors most associated with diabetes prevalence across U.S. counties.
+      The Food Environment Index appears as a leading signal, alongside air pollution, physical inactivity, and limited access to care.
+    </p>
+    <div class="bullet-cards" aria-label="National dashboard highlights">
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Key Findings</h3>
+        <p>Our AI model identifies the most important factors influencing diabetes prevalence. The <em>Food Environment Index</em> is the single greatest predictor, with <em>Air Pollution</em> also being highly significant. This shows that environment, especially food access, is a major driver of risk nationwide.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Visualizing Predictions</h3>
+        <p>We map the model’s predictions and compare them to observed prevalence. The <em>Prediction Accuracy</em> map spotlights counties where the model is strongest and where unmeasured factors may exist, guiding deeper public‑health research.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>U.S. County Profile</h3>
+        <p>An interactive page lets you drill into any county’s raw data and context, providing a deeper look at the information behind our models.</p>
+      </article>
+    </div>
+    <div class="actions">
+      <a class="btn" target="_blank" rel="noopener" href="https://public.tableau.com/views/DiabetesAnalysis_17540043382640/SDOHPriorities?:showVizHome=no">Open in new tab</a>
+      <button class="btn" onclick="document.getElementById('viz1').src=document.getElementById('viz1').src">Reload</button>
+    </div>
+    <div class="frame">
+      <iframe id="viz1" title="National SDOH Priorities — Diabetes" style="height:1000px"
+        src="https://public.tableau.com/views/DiabetesAnalysis_17540043382640/SDOHPriorities?:embed=y&:showVizHome=no">
+      </iframe>
+    </div>
+    <p class="note">Tip: Use the toolbar in the bottom-right of the embed to download, share, or view PDF.</p>
+  </section>
+
+  <section class="panel" id="bridge">
+    <h2>The Critical Bridge: Connecting National to State</h2>
+    <p class="lead">Our national AI analysis provides a clear mandate: The Food Environment Index is a priority.
+    The question is, how do we use this insight to create a plan for one specific state? This is where we transition
+    to our Illinois dashboard.</p>
+  </section>
+
+  <section class="panel" id="illinois">
+    <h2>Part 2: The Illinois View — Geospatial Analysis and Actionable SDOH</h2>
+    <p class="lead">
+      The Illinois dashboard takes the national finding and makes it practical for local public health officials. We move from a broad, predictive view to a specific, granular analysis. This view localizes the national signals. Explore county-level diabetes and obesity in Illinois with SDOH overlays
+      like food insecurity, unemployment, and physical inactivity to identify priority areas for intervention.
+    </p>
+    <div class="bullet-cards" aria-label="Illinois dashboard highlights">
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>A Snapshot of the Problem</h3>
+        <p>We start with a Diabetes prevalence map and identify the top and bottom counties for diabetes, giving us a clear picture of key areas of concern within the state.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Investigating the Drivers</h3>
+        <p>We examine potential drivers using 7 maps showing key Social Determinants of Health (SDOH) factors from the Healthy People 2030 framework, which allows us to investigate factors like unemployment, food insecurity, and physical inactivity.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Driving Action with Bivariate Maps</h3>
+        <p>This is the most crucial page for action. It uses bivariate maps to show the direct correlation between SDOH factors and diabetes rates at the county level. For example, we can see counties that are high in both diabetes prevalence and food insecurity, which are prime targets for intervention.</p>
+      </article>
+    </div>
+    <div class="actions">
+      <a class="btn" target="_blank" rel="noopener" href="https://public.tableau.com/views/SDOH_CompetitionV3/DiabetesOverview?:showVizHome=no">Open in new tab</a>
+      <button class="btn" onclick="document.getElementById('viz2').src=document.getElementById('viz2').src">Reload</button>
+    </div>
+    <div class="frame">
+      <iframe id="viz2" title="Illinois Diabetes Overview" style="height:850px"
+        src="https://public.tableau.com/views/SDOH_CompetitionV3/DiabetesOverview?:embed=y&:showVizHome=no">
+      </iframe>
+    </div>
+    <p class="note">Use filters to focus on counties, compare SDOH layers, and inspect bivariate patterns.</p>
+  </section>
+
+  <section class="panel" id="conclusion">
+    <h2>Conclusion: A Powerful New Methodology</h2>      
+      <div><p>The National dashboard gives us our strategic priority: The &#x27;Food Environment Index&#x27; is the single most important predictor. The Illinois dashboard gives us our tactical roadmap: It uses that national insight to drill down into a local factor, &#x27;Food Insecurity,&#x27; and shows us exactly which counties need help.</p>
+<p>Together, these dashboards provide a powerful new methodology. They allow us to move from a general understanding of the problem to a very specific, evidence-based strategy for intervention.</p></div>
+     </section>
+</main>
+
+<footer>
+  Presented by Brian Chen, PhD, MS, MSAS
+</footer>
+</body>
+</html>
