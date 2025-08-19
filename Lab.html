@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Public Health Data Analysis – Lab Assignment Flow</title>
+  <meta name="description" content="Interactive, single‑file page that visualizes the Question Sets 3, 5, 6, 7.1 flow and maps to the CIDI stages (Clarify, Ideate, Develop, Implement). Includes checklists and autosave." />
+  <style>
+    :root {
+      --bg: #0b1020;          /* page background */
+      --panel: #111935;       /* cards/panels */
+      --muted: #9fb0d1;       /* secondary text */
+      --text: #e8eefc;        /* primary text */
+      --accent: #62e9ff;      /* cyan */
+      --accent2: #a78bfa;     /* purple */
+      --ok: #22c55e;          /* green */
+      --warn: #f59e0b;        /* amber */
+      --err: #ef4444;         /* red */
+      --ring: rgba(98,233,255,.35);
+      --shadow: 0 18px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+    }
+    [data-theme="light"] {
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --muted: #48556b;
+      --text: #0e1530;
+      --accent: #0ea5e9;
+      --accent2: #7c3aed;
+      --ring: rgba(14,165,233,.25);
+      --shadow: 0 12px 30px rgba(2,8,23,.08), inset 0 0 0 1px rgba(2,8,23,.06);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, system-ui, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1000px 600px at 10% -10%, rgba(98,233,255,.08), transparent 60%),
+                  radial-gradient(900px 500px at 110% 10%, rgba(167,139,250,.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 88px; }
+    .topbar { display:flex; align-items:center; gap:12px; justify-content:space-between; margin-bottom:18px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo {
+      width:48px; height:48px; border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 8px 24px rgba(98,233,255,.35);
+      display:grid; place-items:center; color:#001018; font-weight:800;
+    }
+    h1 { font-size: clamp(1.4rem, 1.1rem + 1.5vw, 2.1rem); margin:0; }
+    .subtitle { color: var(--muted); font-size: .98rem; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; }
+    button, .btn { cursor:pointer; border:0; border-radius: 999px; padding:10px 14px; background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); color: var(--text); box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .2s ease; }
+    button:hover, .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color:#06121f; font-weight:700; }
+    .btn-ghost { background: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+    .btn-outline { background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); }
+
+    /* Panels */
+    .grid { display:grid; gap:18px; grid-template-columns: repeat(12, 1fr); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)), var(--panel); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 18px; }
+    .card h2 { margin: 6px 0 10px; font-size: 1.2rem; }
+    .kicker { letter-spacing:.12em; text-transform:uppercase; color: var(--muted); font-size:.78rem; }
+
+    /* Flow canvas */
+    .flow { grid-column: span 12; padding: 0; overflow:hidden; }
+    .flow-svg { width: 100%; height: 340px; display:block; }
+    .flow .legend { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding: 8px 12px; }
+    .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .dot.c { background: var(--accent); }
+    .dot.i { background: #f472b6; }
+    .dot.d { background: #22c55e; }
+    .dot.im { background:#f59e0b; }
+
+    .flow-svg [data-jump]{ cursor:pointer; }
+    details.qs.flash{ outline:2px solid var(--ring); }
+
+    /* Tabs */
+    .tabs { grid-column: span 12; display:grid; grid-template-columns: 220px 1fr; gap: 18px; align-items:start; }
+    .tablist { background: var(--panel); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 8px; display:flex; flex-direction:column; gap:8px; position: sticky; top: 14px; }
+    .tab-btn { text-align:left; background: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); border-radius: 12px; padding: 10px 12px; color: var(--text); }
+    .tab-btn[aria-selected="true"] { background: linear-gradient(135deg, rgba(98,233,255,.18), rgba(167,139,250,.18)); outline: 2px solid var(--ring); }
+
+    .tabpanel { background: var(--panel); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 16px; }
+    .pill { font-size:.78rem; padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.08); margin-right:6px; }
+
+    /* Accordions (Question Sets) */
+    .accordion { grid-column: span 12; display:flex; flex-direction:column; gap:12px; }
+    details.qs { background: var(--panel); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 10px 14px; }
+    details.qs > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; user-select:none; }
+    details.qs > summary::-webkit-details-marker { display:none; }
+    .qs-title { font-weight:700; }
+    .qs-badge { margin-left:auto; font-size:.78rem; color:#06121f; background: linear-gradient(135deg, var(--accent), var(--accent2)); padding:6px 10px; border-radius: 999px; }
+    .qs-inner { padding: 12px 4px 8px 4px; display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+    .qs-col { grid-column: span 12; }
+    @media (min-width: 880px){
+      .qs-col { grid-column: span 6; }
+    }
+    .checklist { display:flex; flex-direction:column; gap:8px; }
+    .item { display:flex; gap:10px; align-items:flex-start; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.06)); border-radius: 12px; padding:10px; }
+    .item input { width:18px; height:18px; margin-top:2px; }
+    .hint { color: var(--muted); font-size:.9rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+    /* Footer */
+    footer { margin-top: 28px; color: var(--muted); font-size:.9rem; }
+
+    /* Bottom section layout */
+    .bottom-grid { grid-column: span 12; display:grid; grid-template-columns: repeat(12, 1fr); gap:18px; align-items:start; }
+    .bottom-grid > .card { grid-column: span 12; }
+    @media (min-width: 960px){
+      .bottom-grid.two > .card:first-child { grid-column: span 8; }
+      .bottom-grid.two > .card:nth-child(2) { grid-column: span 4; }
+    }
+    .status .list { margin: 8px 0 10px; padding-left: 18px; color: var(--muted); }
+    .progress-track { width:100%; max-width:480px; height:10px; border-radius:999px; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+    .progress-bar { height:100%; width:0%; border-radius:inherit; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .35s ease; }
+    .status .row { align-items:center; }
+
+    /* Dialog (modal) */
+    dialog { border: none; border-radius: 16px; padding:0; background: var(--panel); color: var(--text); box-shadow: var(--shadow); width:min(760px, 92vw); }
+    dialog::backdrop { background: rgba(0,0,0,.45); }
+    .dlg-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .dlg-body { padding: 14px; }
+
+    /* Utilities */
+    .sr-only{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .spacer { height: 12px; }
+    .tip { font-size:.92rem; color: var(--muted); }
+    /* Rubric tables */
+    .rubric { grid-column: span 12; }
+    .rubric table { width:100%; border-collapse:collapse; margin-top:8px; }
+    .rubric th, .rubric td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.12); }
+    .rubric th { text-align:left; color: var(--muted); font-size:.9rem; }
+    .rubric td.pts { text-align:right; white-space:nowrap; }
+    .rubric tr:last-child td { border-bottom:none; }
+    .rubric .total { font-weight:700; }
+    details.rub { margin-top:10px; }
+    details.rub > summary { cursor:pointer; padding:8px 10px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border-radius:12px; }
+
+    /* Print */
+    @media print {
+      .tablist, .controls, .legend, dialog { display:none !important; }
+      body { background:#fff; color:#111; }
+      .card, .tabpanel, details.qs { box-shadow:none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#main">Skip to content</a>
+  <div class="wrap" id="app">
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">PH</div>
+        <div>
+          <h1>Public Health Data Analysis – Lab Flow</h1>
+          <div class="subtitle">Interactive overview of Question Sets 3, 5, 6, and 7.1 mapped to the CIDI model. Progress saves locally.</div>
+        </div>
+      </div>
+      <div class="controls" role="group" aria-label="page controls">
+        <button class="btn-ghost" id="themeBtn" title="Toggle light/dark">Toggle theme</button>
+                <button class="btn-primary" id="helpBtn" title="How to use / Embed">Help</button>
+      </div>
+    </header>
+
+    <main id="main" class="grid" role="main">
+      <!-- Flow diagram -->
+      <section class="card flow" aria-labelledby="flowTitle">
+        <div class="row legend">
+          <span class="kicker">Flow</span>
+          <span class="dot c"></span> Clarify
+          <span class="dot i"></span> Ideate
+          <span class="dot d"></span> Develop
+          <span class="dot im"></span> Implement
+          <span class="tip">Click a node to jump to its Question Set</span>
+        </div>
+        <svg class="flow-svg" viewBox="0 0 1200 320" role="img" aria-labelledby="flowTitle flowDesc">
+          <title id="flowTitle">Assignment Flow</title>
+          <desc id="flowDesc">Theme selection flows into QS3, QS5, QS6, and QS7.1 with CIDI stages across.</desc>
+          <!-- connecting path -->
+          <path d="M80,70 C260,70 260,250 440,250 S620,70 800,70 980,250 1120,250" fill="none" stroke="url(#grad)" stroke-width="4" opacity="0.6"/>
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--accent)"/>
+              <stop offset="100%" stop-color="var(--accent2)"/>
+            </linearGradient>
+          </defs>
+          <!-- nodes -->
+          <g tabindex="0" role="button" aria-label="Theme Selection" data-jump="#qs3">
+            <circle cx="80" cy="70" r="36" fill="var(--panel)" stroke="var(--accent)" stroke-width="3"/>
+            <text x="80" y="75" text-anchor="middle" fill="var(--text)" font-weight="700">Theme</text>
+          </g>
+          <g tabindex="0" role="button" aria-label="Question Set 3" data-jump="#qs3">
+            <rect x="220" y="220" rx="14" ry="14" width="220" height="60" fill="var(--panel)" stroke="#f472b6" stroke-width="3"/>
+            <text x="330" y="257" text-anchor="middle" fill="var(--text)" font-weight="700">QS3 • Descriptive</text>
+          </g>
+          <g tabindex="0" role="button" aria-label="Question Set 5" data-jump="#qs5">
+            <rect x="460" y="40" rx="14" ry="14" width="220" height="60" fill="var(--panel)" stroke="#22c55e" stroke-width="3"/>
+            <text x="570" y="77" text-anchor="middle" fill="var(--text)" font-weight="700">QS5 • Relationships</text>
+          </g>
+          <g tabindex="0" role="button" aria-label="Question Set 6" data-jump="#qs6">
+            <rect x="700" y="220" rx="14" ry="14" width="220" height="60" fill="var(--panel)" stroke="#f59e0b" stroke-width="3"/>
+            <text x="810" y="257" text-anchor="middle" fill="var(--text)" font-weight="700">QS6 • Groups</text>
+          </g>
+          <g tabindex="0" role="button" aria-label="Question Set 7.1" data-jump="#qs71">
+            <rect x="960" y="40" rx="14" ry="14" width="220" height="60" fill="var(--panel)" stroke="var(--accent2)" stroke-width="3"/>
+            <text x="1070" y="77" text-anchor="middle" fill="var(--text)" font-weight="700">QS7.1 • Categorical + Synthesis</text>
+          </g>
+        </svg>
+      </section>
+
+      <!-- CIDI Tabs -->
+      <section class="tabs" aria-labelledby="cidiTitle">
+        <div class="tablist" role="tablist" aria-label="CIDI stages">
+          <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-c" id="tabBtn-c">Clarify</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-i" id="tabBtn-i">Ideate</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-d" id="tabBtn-d">Develop</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-im" id="tabBtn-im">Implement</button>
+        </div>
+        <div class="tabpanel" id="tab-c" role="tabpanel" aria-labelledby="tabBtn-c">
+          <span class="kicker">Clarify</span>
+          <h2>Frame a focused public health question</h2>
+          <p class="tip">Choose your theme and identify variables aligned to your statistical method. You’ll do this in QS3, QS5, and QS6 as you refine questions.</p>
+          <div class="row"><span class="pill mono">Output: RQ + Variables</span><span class="pill mono">QS3 / QS5 / QS6</span></div>
+        </div>
+        <div class="tabpanel" id="tab-i" role="tabpanel" aria-labelledby="tabBtn-i" hidden>
+          <span class="kicker">Ideate</span>
+          <h2>Select tests and probe strategies</h2>
+          <p class="tip">Pick the appropriate test(s). Use Copilot to ask what‑ifs and refine your plan before running SPSS.</p>
+          <div class="row"><span class="pill mono">Output: Test choice + rationale</span><span class="pill mono">QS5 / QS6</span></div>
+        </div>
+        <div class="tabpanel" id="tab-d" role="tabpanel" aria-labelledby="tabBtn-d" hidden>
+          <span class="kicker">Develop</span>
+          <h2>Analyze, replicate, and interpret for two audiences</h2>
+          <p class="tip">Run analyses in SPSS, replicate with Copilot, then write professional and lay interpretations. Reflect on how AI shaped your thinking.</p>
+          <div class="row"><span class="pill mono">Output: SPSS + Copilot + Two interpretations</span><span class="pill mono">QS3 / QS5 / QS6</span></div>
+        </div>
+        <div class="tabpanel" id="tab-im" role="tabpanel" aria-labelledby="tabBtn-im" hidden>
+          <span class="kicker">Implement</span>
+          <h2>Translate evidence into a public‑facing deliverable</h2>
+          <p class="tip">Synthesize findings across all modules to produce a policy brief, infographic, slide deck, or AI webpage tailored to a stakeholder audience.</p>
+          <div class="row"><span class="pill mono">Output: Final communication product</span><span class="pill mono">QS7.1</span></div>
+        </div>
+      </section>
+
+      <!-- Question Sets Accordion -->
+      <section class="accordion" aria-labelledby="qsTitle">
+        <h2 id="qsTitle" class="sr-only">Question Sets</h2>
+        <!-- QS3 -->
+        <details class="qs" id="qs3" data-qsid="qs3">
+          <summary>
+            <span class="qs-title">QS3 • Descriptive Statistics</span>
+            <span class="qs-badge" aria-hidden="true">Frequencies • Means • SD • Count</span>
+          </summary>
+          <div class="qs-inner">
+            <div class="qs-col">
+              <div class="kicker">Checklist</div>
+              <div class="checklist" data-checklist>
+                <label class="item"><input type="checkbox" data-key="qs3-theme"> <span><b>Public Health Theme</b> (100–150 words)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs3-rq1"> <span><b>Research Question #1</b> (descriptive patterns/averages)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs3-vars"> <span><b>Variable Selection &amp; Data Collection</b> (100–150 words)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs3-interpret"> <span><b>Findings &amp; Interpretation</b> (Professional + Lay)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs3-reflect"> <span><b>AI Reflection</b> (≈300–450 words)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs3-appendix"> <span><b>Appendix</b> – Copilot chat PDF (AppendixQS3.pdf)</span></label>
+              </div>
+              <div class="spacer"></div>
+              <div class="row">
+                <button class="btn" data-template="qs3">Copy QS3 Template</button>
+                <button class="btn-ghost" data-filename="YourLastName_QS3.docx">Filename Tip</button>
+              </div>
+            </div>
+            <div class="qs-col">
+              <div class="kicker">Guide</div>
+              <p class="hint">Clarify your theme (e.g., obesity, environmental exposure, mental health disparities, chronic disease), identify variables, and run descriptive stats in SPSS. Replicate in Copilot and interpret for two audiences.</p>
+              <p class="tip">Rubric focus: RQ clarity, correct variables, accurate analysis, dual‑audience interpretation, and a thoughtful AI reflection.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- QS5 -->
+        <details class="qs" id="qs5" data-qsid="qs5">
+          <summary>
+            <span class="qs-title">QS5 • Relationships</span>
+            <span class="qs-badge" aria-hidden="true">One‑sample t‑test • Correlation • Simple Regression</span>
+          </summary>
+          <div class="qs-inner">
+            <div class="qs-col">
+              <div class="kicker">Checklist</div>
+              <div class="checklist" data-checklist>
+                <label class="item"><input type="checkbox" data-key="qs5-rq2"> <span><b>Research Question #2</b> (variable relationships)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs5-vars"> <span><b>Variables &amp; Test Choice</b> (100–150 words; justify test)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs5-interpret"> <span><b>Findings &amp; Interpretation</b> (Professional + Lay)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs5-reflect"> <span><b>AI Reflection</b> (≈300–450 words total)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs5-appendix"> <span><b>Appendix</b> – Copilot chat PDF (AppendixQS5.pdf)</span></label>
+              </div>
+              <div class="spacer"></div>
+              <div class="row">
+                <button class="btn" data-template="qs5">Copy QS5 Template</button>
+                <button class="btn-ghost" data-filename="YourLastName_QS5.docx">Filename Tip</button>
+              </div>
+            </div>
+            <div class="qs-col">
+              <div class="kicker">Guide</div>
+              <p class="hint">Ideate by selecting and justifying the statistical test (t‑test, correlation, or regression). Then Develop: run SPSS, replicate in Copilot, and write dual‑audience interpretations.</p>
+              <p class="tip">Compare outputs (SPSS vs Copilot) and reflect on clarity, oversimplification, or ethical issues.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- QS6 -->
+        <details class="qs" id="qs6" data-qsid="qs6">
+          <summary>
+            <span class="qs-title">QS6 • Group Comparisons</span>
+            <span class="qs-badge" aria-hidden="true">Independent/Paired t‑test • ANOVA</span>
+          </summary>
+          <div class="qs-inner">
+            <div class="qs-col">
+              <div class="kicker">Checklist</div>
+              <div class="checklist" data-checklist>
+                <label class="item"><input type="checkbox" data-key="qs6-rq3"> <span><b>Research Question #3</b> (group differences)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs6-vars"> <span><b>Variables &amp; Test Choice</b> (100–150 words; justify test)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs6-interpret"> <span><b>Findings &amp; Interpretation</b> (Professional + Lay)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs6-reflect"> <span><b>AI Reflection</b> (≈300–450 words total)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs6-appendix"> <span><b>Appendix</b> – Copilot chat PDF (AppendixQS6.pdf)</span></label>
+              </div>
+              <div class="spacer"></div>
+              <div class="row">
+                <button class="btn" data-template="qs6">Copy QS6 Template</button>
+                <button class="btn-ghost" data-filename="YourLastName_QS6.docx">Filename Tip</button>
+              </div>
+            </div>
+            <div class="qs-col">
+              <div class="kicker">Guide</div>
+              <p class="hint">Clarify your groups and outcomes. Ideate the correct comparison test (independent/paired t‑test or ANOVA), then Develop: run/replicate and interpret for both audiences.</p>
+              <p class="tip">Document any discrepancies between SPSS and Copilot and how they affect interpretation.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- QS7.1 -->
+        <details class="qs" id="qs71" data-qsid="qs71">
+          <summary>
+            <span class="qs-title">QS7.1 • Categorical Analysis &amp; Synthesis</span>
+            <span class="qs-badge" aria-hidden="true">Chi‑square • Final Deliverable</span>
+          </summary>
+          <div class="qs-inner">
+            <div class="qs-col">
+              <div class="kicker">Checklist</div>
+              <div class="checklist" data-checklist>
+                <label class="item"><input type="checkbox" data-key="qs71-rq4"> <span><b>Research Question #4</b> (categorical association)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs71-vars"> <span><b>Variables &amp; Test Choice</b> (100–150 words; confirm chi‑square)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs71-interpret"> <span><b>Findings &amp; Interpretation</b> (Professional + Lay)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs71-reflect"> <span><b>AI Reflection</b> (≈300–450 words total)</span></label>
+                <label class="item"><input type="checkbox" data-key="qs71-product"> <span><b>Final Deliverable</b> + 50‑word summary</span></label>
+                <label class="item"><input type="checkbox" data-key="qs71-appendix"> <span><b>Appendix</b> – Copilot chat PDF (AppendixQS7.1.pdf)</span></label>
+              </div>
+              <div class="spacer"></div>
+              <div class="row">
+                <button class="btn" data-template="qs71">Copy QS7.1 Template</button>
+                <button class="btn-ghost" data-filename="YourLastName_QS7.1.docx">Filename Tip</button>
+              </div>
+            </div>
+            <div class="qs-col">
+              <div class="kicker">Guide</div>
+              <p class="hint">Implement: synthesize findings across QS3/5/6 and create a public‑facing product (policy brief, infographic, slide deck, or AI webpage) tailored to a specific audience.</p>
+              <p class="tip">Include a concise 50‑word summary of purpose, message, and audience.</p>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Bottom: CEPH + Status -->
+      <section class="bottom-grid" aria-labelledby="bottomTitle">
+        <h2 id="bottomTitle" class="sr-only">CEPH<\/h2>
+        <article class="card" aria-labelledby="cephTitle">
+          <span class="kicker">CEPH Mapping & Submission</span>
+          <h2 id="cephTitle">Competencies & Formatting</h2>
+          <ul>
+            <li><b>C2</b> – Data Collection Methods: clear RQs, correct variable selection.</li>
+            <li><b>C3</b> – Data Analysis: accurate SPSS, successful Copilot replication, and comparison.</li>
+            <li><b>C4</b> – Interpretation: precise professional and clear lay explanations.</li>
+            <li><b>C18/C19</b> – Communication: audience‑appropriate product and language.</li>
+          </ul>
+          <p class="tip">Save each submission as <span class="mono">YourLastName_QS3/5/6/7.1.docx</span> and upload to Canvas with the required appendix PDFs.</p>
+        </article>
+        
+      </section>
+
+      <section class="card rubric" aria-labelledby="rubricTitle">
+        <span class="kicker">Grading</span>
+        <h2 id="rubricTitle">Grading Rubrics</h2>
+        <p class="tip">Two rubrics are used: <b>Coursework</b> (applies to QS3, QS5, QS6, and QS7.1 — each scored out of 30 points) and a separate <b>Final Deliverable</b> rubric for QS7.1 (30 points).</p>
+
+        <details class="rub"><summary><strong>Coursework — QS3, QS5, QS6, QS7.1 (30 pts each)</strong></summary>
+          <table aria-label="Coursework rubric for QS3, QS5, QS6, QS7.1">
+            <thead><tr><th>Criteria (applies to each Question Set)</th><th class="pts">Pts</th></tr></thead>
+            <tbody>
+              <tr><td><b>RQ & Variables/Test & Data Collection</b> — Clear, focused research question; correct variables identified; appropriate quantitative data source or collection described (CEPH C2).</td><td class="pts">3</td></tr>
+              <tr><td><b>SPSS Analysis Execution</b> — Correct procedure, assumptions acknowledged as relevant; outputs labeled and legible (CEPH C3).</td><td class="pts">3</td></tr>
+              <tr><td><b>AI Engagement</b> — Copilot (or equivalent) used to replicate/verify analysis; relevant outputs included (CEPH C3).</td><td class="pts">3</td></tr>
+              <tr><td><b>Comparison & Reflection</b> — SPSS vs. AI similarities/differences explained; limitations/ethics thoughtfully addressed (CEPH C3).</td><td class="pts">3</td></tr>
+              <tr><td><b>Interpretation — Professional Audience</b> — Accurate, concise, statistically sound interpretation tailored to a professional audience (CEPH C4).</td><td class="pts">6</td></tr>
+              <tr><td><b>Interpretation — Lay Audience</b> — Clear, jargon‑free explanation with appropriate framing for non‑experts (CEPH C4, C18, C19).</td><td class="pts">6</td></tr>
+              <tr><td><b>Content & Critical Thinking</b> — Insightfulness, coherence, and alignment to public health relevance; formatting/filename compliance.</td><td class="pts">6</td></tr>
+              <tr><td class="total">Total</td><td class="pts total">30</td></tr>
+            </tbody>
+          </table>
+        </details>
+        <details class="rub"><summary><strong>Final Deliverable – QS7.1 (30 pts)</strong></summary>
+          <table aria-label="Final deliverable rubric">
+            <thead><tr><th>Criteria</th><th class="pts">Pts</th></tr></thead>
+            <tbody>
+              <tr><td>1. Synthesis of Findings</td><td class="pts">9</td></tr>
+              <tr><td>2. Actionable Public Health Insight (CEPH C4)</td><td class="pts">9</td></tr>
+              <tr><td>3. Audience Tailoring &amp; Communication Quality (CEPH C18, C19)</td><td class="pts">6</td></tr>
+              <tr><td>4. Professional Presentation &amp; Format</td><td class="pts">6</td></tr>
+              <tr><td class="total">Total</td><td class="pts total">30</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <!-- Templates / Help Dialog -->
+  <dialog id="tplDlg" aria-label="Copyable template">
+    <div class="dlg-head"><strong>Template</strong><button class="btn-ghost" onclick="tplDlg.close()">Close</button></div>
+    <div class="dlg-body">
+      <pre id="tplText" class="mono" style="white-space:pre-wrap; user-select:all"></pre>
+      <div class="spacer"></div>
+      <div class="row"><button class="btn-primary" id="copyBtn">Copy to Clipboard</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="helpDlg" aria-label="Help & embedding">
+    <div class="dlg-head"><strong>How to use & embed</strong><button class="btn-ghost" onclick="helpDlg.close()">Close</button></div>
+    <div class="dlg-body">
+      <ol>
+        <li>Click nodes in the flow to jump to each Question Set.</li>
+        <li>Open a section and check off required items as you complete them. Progress saves automatically.</li>
+        <li>Use <em>Copy Template</em> to paste a structured outline into your document.</li>
+              </ol>
+      <p><b>Embed in Canvas:</b> Create a new Page → Switch to <em>HTML Editor</em> → Paste this entire file’s HTML → Save. Or host this file and use an <em>Embed</em> iframe with height ≈ 1200px.</p>
+    </div>
+  </dialog>
+
+  <script>
+  (function(){
+    const app = document.getElementById('app');
+    const THEME_KEY = 'phlab_theme_v1';
+    const STATE_KEY = 'phlab_checklist_v1';
+
+    // Theme
+    const themeBtn = document.getElementById('themeBtn');
+    const applyTheme = (t) => document.documentElement.setAttribute('data-theme', t);
+    const initTheme = () => {
+      const saved = localStorage.getItem(THEME_KEY) || 'dark';
+      applyTheme(saved);
+    };
+    const toggleTheme = () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      applyTheme(next); localStorage.setItem(THEME_KEY, next);
+    };
+
+    // Jump from SVG nodes
+    function jumpTo(sel){
+      const t = document.querySelector(sel);
+      if(!t) return;
+      t.open = true;
+      try { t.scrollIntoView({behavior:'smooth', block:'start'}); } catch(_) { t.scrollIntoView(); }
+      t.classList.add('flash');
+      setTimeout(()=> t.classList.remove('flash'), 1200);
+    }
+    document.querySelectorAll('[data-jump]').forEach(n => {
+      n.addEventListener('click', () => jumpTo(n.getAttribute('data-jump')));
+      n.addEventListener('keydown', (e) => {
+        if(e.key==='Enter' || e.key===' ') { e.preventDefault(); jumpTo(n.getAttribute('data-jump')); }
+      });
+    });
+
+    // Tabs
+    const tabBtns = ['c','i','d','im'].map(id=>document.getElementById(`tabBtn-${id}`));
+    const tabs = ['c','i','d','im'].map(id=>document.getElementById(`tab-${id}`));
+    function showTab(idx){
+      tabBtns.forEach((b,i)=>{ b.setAttribute('aria-selected', i===idx); });
+      tabs.forEach((p,i)=>{ p.hidden = i!==idx; });
+    }
+    tabBtns.forEach((b,i)=> b.addEventListener('click', ()=>showTab(i)) );
+
+    // Checklist state
+    const state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+    document.querySelectorAll('[data-checklist]').forEach(list => {
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const key = cb.getAttribute('data-key');
+        cb.checked = !!state[key];
+        cb.addEventListener('change', ()=>{ state[key] = cb.checked; localStorage.setItem(STATE_KEY, JSON.stringify(state)); });
+      });
+    });
+
+    // Templates
+    const templates = {
+      qs3: `Public Health Theme (100–150 words)\n— Theme: [e.g., obesity, environmental exposure, mental health disparities, chronic disease]\n— Why this matters for the dataset\n\nResearch Question #1 (one sentence)\n— Focus on patterns/averages/distributions\n\nVariable Selection & Data Collection (100–150 words)\n— Variables: [list]\n— Data collection method (quantitative)\n\nFindings & Interpretation\n— Professional audience: [write here]\n— Lay audience: [write here]\n\nAI Reflection (≈300–450 words total)\n— How Copilot replicated/ differed from SPSS\n— What prompts you used\n— Learning/ethics notes (bias, oversimplification, reliance)\n\nAppendix: Export Copilot chat as AppendixQS3.pdf`,
+      qs5: `Research Question #2 (one sentence)\n— Relationship between variables\n\nVariables & Test Choice (100–150 words)\n— DV / IV\n— Justify test (one-sample t-test / correlation / simple regression)\n\nFindings & Interpretation\n— Professional audience: [write here]\n— Lay audience: [write here]\n\nAI Reflection (≈300–450 words total)\n— Compare SPSS vs Copilot outputs\n— Prompts used and effect on analysis\n— Ethical considerations\n\nAppendix: Export Copilot chat as AppendixQS5.pdf`,
+      qs6: `Research Question #3 (one sentence)\n— Group differences\n\nVariables & Test Choice (100–150 words)\n— DV / IV\n— Justify independent/paired t-test or ANOVA\n\nFindings & Interpretation\n— Professional audience: [write here]\n— Lay audience: [write here]\n\nAI Reflection (≈300–450 words total)\n— Compare SPSS vs Copilot outputs\n— Prompts used and effect on analysis\n— Ethical considerations\n\nAppendix: Export Copilot chat as AppendixQS6.pdf`,
+      qs71:`Research Question #4 (one sentence)\n— Association between categorical variables\n\nVariables & Test Choice (100–150 words)\n— DV / IV\n— Confirm chi-square is appropriate\n\nFindings & Interpretation\n— Professional audience: [write here]\n— Lay audience: [write here]\n\nAI Reflection (≈300–450 words total)\n— Compare SPSS vs Copilot outputs\n— Prompts used and effect on analysis\n— Ethical considerations\n\nFinal Deliverable\n— Product type (brief/infographic/slides/AI webpage)\n— 50-word summary (purpose, message, audience)\n\nAppendix: Export Copilot chat as AppendixQS7.1.pdf`
+    };
+
+    const tplDlg = document.getElementById('tplDlg');
+    const tplText = document.getElementById('tplText');
+    const copyBtn = document.getElementById('copyBtn');
+    document.querySelectorAll('[data-template]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const key = btn.getAttribute('data-template');
+        tplText.textContent = templates[key] || '';
+        tplDlg.showModal();
+      });
+    });
+    copyBtn.addEventListener('click', async ()=>{
+      try { await navigator.clipboard.writeText(tplText.textContent); copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy to Clipboard', 1200);} catch(e){ alert('Copy failed. Select text and press Ctrl/Cmd+C.'); }
+    });
+
+    // Filename tips
+    document.querySelectorAll('[data-filename]').forEach(btn=>{
+      btn.addEventListener('click', ()=> alert('Use file name: ' + btn.getAttribute('data-filename')));
+    });
+
+    // Progress meter + reset/print
+    function updateProgress(){
+      const boxes = document.querySelectorAll('[data-checklist] input[type="checkbox"]');
+      const total = boxes.length;
+      const checked = Array.from(boxes).filter(b=>b.checked).length;
+      const pct = total ? Math.round((checked/total)*100) : 0;
+      const bar = document.getElementById('progressBar');
+      const num = document.getElementById('progressNum');
+      if(bar) bar.style.width = pct + '%';
+      if(num) num.textContent = `${checked}/${total} complete (${pct}%)`;
+    }
+    document.addEventListener('change', (e)=>{
+      if(e.target && e.target.matches('[data-checklist] input[type="checkbox"]')) updateProgress();
+    });
+    const resetBtn = document.getElementById('resetBtn');
+    if(resetBtn){
+      resetBtn.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-checklist] input[type="checkbox"]').forEach(cb=>cb.checked=false);
+        for (const k of Object.keys(state)) delete state[k];
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+        updateProgress();
+      });
+    }
+    const printBtn = document.getElementById('printBtn');
+    if(printBtn){ printBtn.addEventListener('click', ()=> window.print()); }
+
+    // Help dialog
+    const helpDlg = document.getElementById('helpDlg');
+    document.getElementById('helpBtn').addEventListener('click', ()=> helpDlg.showModal());
+
+    // Init
+    initTheme();
+    themeBtn.addEventListener('click', toggleTheme);
+    updateProgress();
+  })();
+  </script>
+</body>
+</html>
