@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MPH Student Roadmap</title>
+  <meta name="description" content="One‑page roadmap for Master of Public Health (MPH) students: foundations, experiential enrichment, and career‑aligned preparation for consulting, government, or doctoral study." />
+  <style>
+    :root {
+      /* 2025 Color Trends (extracted from your image) */
+      --quietude: #adbbb2;   /* Sherwin Williams Quietude */
+      --rumors:   #7b4c4f;   /* Behr Rumors */
+      --encore:   #0f456e;   /* Valspar Encore */
+      --cinnamon: #897475;   /* Benjamin Moore Cinnamon Slate */
+
+      /* Theme tokens */
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937; /* slate-800 */
+      --muted: #475569; /* slate-600 */
+      --brand: var(--encore);
+      --brand-2: var(--quietude);
+      --accent: var(--rumors);
+      --ring: rgba(15, 69, 110, 0.25); /* from --encore */
+      --border: #e5e7eb; /* gray-200 */
+      --brand-rgb: 15, 69, 110;
+    }
+
+    /* Base */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; color: var(--text);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--quietude) 12%, #ffffff 88%) 0%, #ffffff 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    }
+
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { width: min(1100px, 92vw); margin: 0 auto; }
+
+    /* Header / Hero */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: saturate(110%) blur(10px);
+      background: rgba(255,255,255,0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; padding: .75rem 0;
+    }
+    .brand { font-weight: 700; letter-spacing: .2px; display: flex; align-items: center; gap: .6rem; color: var(--text); }
+    .brand .dot { width: .9rem; height: .9rem; border-radius: 999px; background: linear-gradient(135deg, var(--brand), var(--accent)); box-shadow: 0 0 0 4px var(--ring); }
+    .nav a { color: var(--muted); font-weight: 600; padding: .5rem .75rem; border-radius: .6rem; }
+    .nav a[role="button"] { color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 10px 25px -12px var(--ring); }
+    .nav a.active, .nav a:hover { color: var(--brand); }
+
+    .hero { padding: 3.2rem 0 2rem; text-align: left; }
+    .headline { font-size: clamp(1.8rem, 2.6vw + 1rem, 2.6rem); line-height: 1.15; margin: 0 0 .6rem; }
+    .sub { color: var(--muted); max-width: 70ch; }
+
+    .badges { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .6rem; }
+    .badge { font-size: .8rem; padding: .35rem .6rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--quietude) 55%, #ffffff 45%); color: var(--brand); background: color-mix(in srgb, var(--quietude) 20%, #ffffff 80%); }
+
+    /* Sections */
+    section, .hero { padding: 2.2rem 0; scroll-margin-top: 80px; }
+    h2 { font-size: clamp(1.2rem, 1.4vw + .8rem, 1.6rem); margin: 0 0 1rem; }
+    h3 { font-size: 1.05rem; margin: 0 0 .6rem; }
+    p { margin: .35rem 0 .75rem; }
+
+    /* Cards */
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1rem; }
+    .card { grid-column: span 12; background: var(--card);
+      border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; box-shadow: 0 12px 30px -20px rgba(2,6,23,0.25); }
+    @media (min-width: 820px) {
+      .card.third { grid-column: span 4; }
+      .card.half { grid-column: span 6; }
+    }
+
+    .card h3 { display: flex; align-items: center; gap: .5rem; }
+    .pill { font-size: .72rem; padding: .25rem .5rem; border-radius: .5rem; color: #fff; background: linear-gradient(135deg, var(--brand), var(--accent)); font-weight: 700; letter-spacing: .2px; }
+
+    /* Accordion */
+    .accordion { border-radius: .9rem; overflow: hidden; border: 1px solid var(--border); background: #fff; }
+    .acc-item + .acc-item { border-top: 1px solid var(--border); }
+    .acc-btn { all: unset; display: grid; grid-template-columns: 1fr auto; gap: 1rem; width: 100%; padding: .9rem 1rem; cursor: pointer; }
+    .acc-btn:hover { background: color-mix(in srgb, var(--quietude) 15%, #ffffff 85%); }
+    .acc-btn .kicker { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: .78rem; }
+    .acc-panel { display: none; padding: 0 1rem 1rem; color: var(--muted); }
+    .acc-item[open] .acc-panel { display: block; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .tab { padding: .5rem .8rem; border-radius: .6rem; border: 1px solid var(--border); color: var(--muted); background: #f9fafb; cursor: pointer; user-select: none; }
+    .tab[aria-selected="true"] { color: #fff; background: linear-gradient(135deg, var(--brand), var(--accent)); border-color: transparent; }
+    .panels > .panel { display: none; }
+    .panels > .panel[aria-hidden="false"] { display: block; }
+
+    /* Lists */
+    ul { margin: .5rem 0 .5rem 1.1rem; padding: 0; }
+    li + li { margin-top: .2rem; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; border-radius: 1rem; border: 1px solid var(--border); background: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; min-width: 900px; }
+    th, td { text-align: left; padding: .75rem; vertical-align: top; }
+    thead th { position: sticky; top: 0; background: color-mix(in srgb, var(--quietude) 15%, #ffffff 85%); backdrop-filter: blur(6px); }
+    tbody tr:nth-child(odd) { background: #fafafa; }
+    tbody tr.highlight { outline: 2px solid var(--brand); outline-offset: -2px; background: rgba(var(--brand-rgb), 0.08); }
+    .small { color: var(--muted); font-size: .9rem; }
+
+    /* Responsive table (stacked cards under 720px) */
+    @media (max-width: 720px) {
+      .table-wrap { border: 0; background: transparent; }
+      table { width: 100%; min-width: 0; border: 0; }
+      thead { display: none; }
+      table, tbody, tr, th, td { display: block; }
+      tbody tr { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: .9rem; overflow: hidden; background: #fff; }
+      tbody tr.highlight { background: rgba(var(--brand-rgb), 0.06); }
+      tbody tr > th[scope="row"] { background: color-mix(in srgb, var(--quietude) 18%, #ffffff 82%); font-weight: 700; font-size: 1rem; padding: .85rem .9rem; }
+      tbody tr > td { padding: .65rem .9rem; border-top: 1px solid var(--border); }
+      tbody tr > td::before { content: attr(data-label); display: block; font-weight: 700; color: var(--muted); margin-bottom: .25rem; }
+    }
+
+    /* Utilities */
+    .row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+    .spacer { height: 1rem; }
+
+    .toolbar { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .btn { border: 1px solid var(--border); background: #ffffff; color: var(--text); padding: .5rem .8rem; border-radius: .6rem; cursor: pointer; box-shadow: 0 2px 10px -6px rgba(2,6,23,0.15); }
+    .btn:hover { background: #f3f4f6; }
+
+    /* Footer */
+    footer { padding: 2.5rem 0 3.5rem; color: var(--muted); text-align: center; }
+
+    /* Print */
+    @media print {
+      header, .toolbar, .badges, .nav { display: none !important; }
+      body { background: white; color: black; }
+      .card, .table-wrap, .accordion { border-color: #ddd !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav" role="navigation" aria-label="Primary">
+      <div class="brand"><span class="dot" aria-hidden="true"></span> <span>MPH Student Roadmap</span></div>
+      <nav class="row">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#foundations">Foundations</a>
+        <a href="#paths">Career Paths</a>
+        <a href="#table">Summary Table</a>
+      </nav>
+    </div>
+  </header>
+    <!-- Hero moved outside sticky header to keep nav visible -->
+    <div class="container hero" id="overview">
+      <h1 class="headline">A 3‑Component Roadmap for Master of Public Health (MPH) Students</h1>
+      <p class="sub">This roadmap outlines key focus areas for academic and professional development. It emphasizes: <strong>Academic Foundations</strong>, <strong>Enrichment Through Experience</strong>, and <strong>Defining & Preparing for a Future Path</strong> across Consulting, Government, and Doctoral trajectories.</p>
+      <div class="badges">
+        <span class="badge">12 Required Courses</span>
+        <span class="badge">Comprehensive Closure Exam</span>
+        <span class="badge">Internships & Service‑Learning</span>
+        <span class="badge">Certifications: CHES, SAS, GIS, PMP</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="toolbar">
+        <button class="btn" id="jumpConsulting">Jump to Consulting</button>
+        <button class="btn" id="jumpGov">Jump to Government</button>
+        <button class="btn" id="jumpDoctoral">Jump to Doctoral</button>
+      </div>
+    </div>
+
+  <main class="container">
+    <!-- Foundations / Accordion -->
+    <section id="foundations" aria-labelledby="foundations-title">
+      <h2 id="foundations-title">What Should an MPH Student Focus On? <span class="pill">3‑Component Roadmap</span></h2>
+      <div class="accordion" role="list">
+        <div class="acc-item" open>
+          <button class="acc-btn" aria-expanded="true">
+            <span>
+              <div class="kicker">1. Academic Foundations</div>
+              <div>Complete 12 required courses and pass the Comprehensive Closure Exam.</div>
+            </span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          <div class="acc-panel">
+            <p>This ensures development of core competencies in public health theory, research methods, and applied practice.</p>
+          </div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false">
+            <span>
+              <div class="kicker">2. Enrichment Through Experience</div>
+              <div>Engage in research, service‑learning, leadership, and professional certifications.</div>
+            </span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          <div class="acc-panel">
+            <ul>
+              <li>Research with faculty or community partners.</li>
+              <li>Service‑learning, volunteering, or student leadership.</li>
+              <li>Certifications: CHES, SAS, GIS, project management, and related credentials.</li>
+            </ul>
+            <p class="small">These experiences enhance real‑world skills, expand your professional network, and support career readiness.</p>
+          </div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-btn" aria-expanded="false">
+            <span>
+              <div class="kicker">3. Define & Prepare for Your Future Path</div>
+              <div>Begin shaping a trajectory in Consulting, Governmental Public Health, or Doctoral Study.</div>
+            </span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          <div class="acc-panel">
+            <p>Each path has unique expectations—plan ahead by networking, building relevant experience, and developing a strong professional or academic portfolio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Career Paths / Tabs -->
+    <section id="paths" aria-labelledby="paths-title">
+      <h2 id="paths-title">Career‑Aligned Profile Development & Advising Recommendations</h2>
+
+      <div class="tabs" role="tablist" aria-label="Career paths">
+        <button class="tab" role="tab" aria-selected="true" aria-controls="panel-consulting" id="tab-consulting" data-row="consulting">Private Sector / Public Health Consulting</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="panel-government" id="tab-government" data-row="government">Governmental Public Health</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="panel-doctoral" id="tab-doctoral" data-row="doctoral">Doctoral Study (PhD/DrPH)</button>
+      </div>
+
+      <div class="panels" style="margin-top: 1rem;">
+        <!-- Consulting Panel -->
+        <section id="panel-consulting" class="panel" role="tabpanel" aria-hidden="false" aria-labelledby="tab-consulting">
+          <div class="grid">
+            <article class="card third">
+              <h3>Common Roles</h3>
+              <ul>
+                <li>Data analyst</li>
+                <li>Health educator</li>
+                <li>Evaluator</li>
+                <li>Project coordinator</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Course Emphasis</h3>
+              <ul>
+                <li>Biostatistics</li>
+                <li>Program planning & evaluation</li>
+                <li>Health informatics</li>
+                <li>Health communication</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Experience</h3>
+              <ul>
+                <li>Internship at consulting firms</li>
+                <li>Healthcare organizations</li>
+                <li>Nonprofits</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Certifications</h3>
+              <ul>
+                <li>CHES</li>
+                <li>Project Management (PMP)</li>
+                <li>Tableau</li>
+                <li>SAS</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Portfolio Items</h3>
+              <ul>
+                <li>Sample data visualizations</li>
+                <li>Program evaluation reports</li>
+                <li>Outreach materials</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Networking Tip</h3>
+              <p>Attend conferences (e.g., SOPHE, APHA); request informational interviews with alumni in consulting.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Government Panel -->
+        <section id="panel-government" class="panel" role="tabpanel" aria-hidden="true" aria-labelledby="tab-government">
+          <div class="grid">
+            <article class="card third">
+              <h3>Common Roles</h3>
+              <ul>
+                <li>Epidemiologist</li>
+                <li>Public health advisor</li>
+                <li>Health policy analyst</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Course Emphasis</h3>
+              <ul>
+                <li>Epidemiology</li>
+                <li>Policy analysis</li>
+                <li>Health systems</li>
+                <li>Environmental health</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Experience</h3>
+              <ul>
+                <li>Practicum or service at local/state health departments</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Certifications</h3>
+              <ul>
+                <li>SAS</li>
+                <li>GIS</li>
+                <li>FEMA Incident Command Training</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Portfolio Items</h3>
+              <ul>
+                <li>Surveillance data summaries</li>
+                <li>Health policy briefs</li>
+                <li>Community needs assessments</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Networking Tip</h3>
+              <p>Participate in state public health association events or join student fellowships (e.g., CSTE, HRSA).</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Doctoral Panel -->
+        <section id="panel-doctoral" class="panel" role="tabpanel" aria-hidden="true" aria-labelledby="tab-doctoral">
+          <div class="grid">
+            <article class="card third">
+              <h3>Common Roles</h3>
+              <ul>
+                <li>Researcher</li>
+                <li>Professor</li>
+                <li>Senior public health leader</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Course Emphasis</h3>
+              <ul>
+                <li>Advanced research methods</li>
+                <li>Theory‑driven public health</li>
+                <li>Proposal writing</li>
+              </ul>
+            </article>
+            <article class="card third">
+              <h3>Recommended Experience</h3>
+              <ul>
+                <li>Faculty‑mentored research projects</li>
+                <li>Conference presentations</li>
+                <li>Published abstracts</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Certifications</h3>
+              <ul>
+                <li>IRB CITI training</li>
+                <li>NIH grant fundamentals</li>
+              </ul>
+            </article>
+            <article class="card half">
+              <h3>Recommended Portfolio Items</h3>
+              <ul>
+                <li>Academic CV</li>
+                <li>Writing sample</li>
+                <li>Personal statement draft</li>
+                <li>Research proposal</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Networking Tip</h3>
+              <p>Identify potential PhD/DrPH mentors early; attend research‑focused conferences and webinars.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Summary Table -->
+    <section id="table" aria-labelledby="table-title">
+      <div class="row" style="justify-content: space-between; align-items: end; gap: .8rem;">
+        <h2 id="table-title">Career Path Summary (Quick Compare)</h2>
+        <div class="toolbar" role="group" aria-label="Highlight table row by path">
+          <button class="btn" data-highlight="consulting">Highlight Consulting</button>
+          <button class="btn" data-highlight="government">Highlight Government</button>
+          <button class="btn" data-highlight="doctoral">Highlight Doctoral</button>
+          <button class="btn" data-highlight="clear">Clear</button>
+        </div>
+      </div>
+      <div class="table-wrap" role="region" aria-label="Career Path Comparison Table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Career Path</th>
+              <th scope="col">Common Roles</th>
+              <th scope="col">Recommended Course Emphasis</th>
+              <th scope="col">Recommended Experience</th>
+              <th scope="col">Recommended Certifications</th>
+              <th scope="col">Recommended Portfolio Items</th>
+              <th scope="col">Networking Guidance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-row="consulting">
+              <th scope="row">Private Sector / Public Health Consulting</th>
+              <td>Data analyst, health educator, evaluator, project coordinator</td>
+              <td>Biostatistics; program planning/evaluation; health informatics; health communication</td>
+              <td>Internship at consulting firms; healthcare organizations; nonprofits</td>
+              <td>CHES; Project Management (PMP); Tableau; SAS</td>
+              <td>Sample data visualizations; program evaluation reports; outreach materials</td>
+              <td>Attend conferences (e.g., SOPHE, APHA); request informational interviews with alumni in consulting</td>
+            </tr>
+            <tr data-row="government">
+              <th scope="row">Governmental Public Health</th>
+              <td>Epidemiologist; public health advisor; health policy analyst</td>
+              <td>Epidemiology; policy analysis; health systems; environmental health</td>
+              <td>Practicum or service work at local/state health departments</td>
+              <td>SAS; GIS; FEMA Incident Command Training</td>
+              <td>Surveillance data summaries; health policy briefs; community needs assessments</td>
+              <td>Participate in state public health association events or join student fellowships (e.g., CSTE, HRSA)</td>
+            </tr>
+            <tr data-row="doctoral">
+              <th scope="row">Doctoral Study (PhD/DrPH)</th>
+              <td>Researcher; professor; senior public health leader</td>
+              <td>Advanced research methods; theory‑driven public health; proposal writing</td>
+              <td>Faculty‑mentored research projects; conference presentations; published abstracts</td>
+              <td>IRB CITI training; NIH grant fundamentals</td>
+              <td>Academic CV; writing sample; personal statement draft; research proposal</td>
+              <td>Identify potential PhD/DrPH mentors early; attend research‑focused conferences and webinars</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Designed by Dr. Chen to support your MPH academic planning, experiential learning, and career preparation.</p>
+      <p class="small">Tip: Press Ctrl/Cmd+P to print or save as PDF.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for in‑page links + nav active state
+    const navLinks = document.querySelectorAll('header nav a');
+    function setActive(link){ navLinks.forEach(l=>l.classList.remove('active')); if (link) link.classList.add('active'); }
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        if (id.length > 1) {
+          e.preventDefault();
+          document.querySelector(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (a.closest('header')) setActive(a);
+        }
+      });
+    });
+
+    // Jump buttons (activate tabs before scrolling so hidden panels become visible)
+    document.getElementById('jumpConsulting')?.addEventListener('click', () => {
+      const t = document.getElementById('tab-consulting');
+      if (t) activateTab(t);
+    });
+    document.getElementById('jumpGov')?.addEventListener('click', () => {
+      const t = document.getElementById('tab-government');
+      if (t) activateTab(t);
+    });
+    document.getElementById('jumpDoctoral')?.addEventListener('click', () => {
+      const t = document.getElementById('tab-doctoral');
+      if (t) activateTab(t);
+    });
+
+    // Accordion behavior
+    document.querySelectorAll('.acc-item').forEach((item) => {
+      const btn = item.querySelector('.acc-btn');
+      btn.addEventListener('click', () => {
+        const isOpen = item.hasAttribute('open');
+        document.querySelectorAll('.acc-item').forEach(i => { i.removeAttribute('open'); i.querySelector('.acc-btn').setAttribute('aria-expanded', 'false'); });
+        if (!isOpen) { item.setAttribute('open', ''); btn.setAttribute('aria-expanded', 'true'); }
+      });
+    });
+
+    // Tabs behavior + sync highlight to table
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    function activateTab(tab) {
+      tabs.forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+      panels.forEach(p => p.setAttribute('aria-hidden', String('#' + p.id !== '#' + tab.getAttribute('aria-controls'))));
+      // highlight row
+      highlightRow(tab.dataset.row);
+      // scroll the panel into view on small screens
+      document.getElementById(tab.getAttribute('aria-controls'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => activateTab(tab));
+      tab.addEventListener('keydown', (e) => {
+        // arrow key navigation
+        const arr = Array.from(tabs);
+        const i = arr.indexOf(tab);
+        if (e.key === 'ArrowRight') arr[(i + 1) % arr.length].focus();
+        if (e.key === 'ArrowLeft') arr[(i - 1 + arr.length) % arr.length].focus();
+      });
+    });
+
+    // Build data-labels for responsive table
+    (function(){
+      const headers = Array.from(document.querySelectorAll('#table table thead th')).map(th => th.textContent.trim());
+      document.querySelectorAll('#table tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach((td, i) => td.setAttribute('data-label', headers[i+1] || ''));
+      });
+    })();
+
+    // Table row highlighter
+    const tableRows = document.querySelectorAll('tbody tr');
+    function highlightRow(key) {
+      tableRows.forEach(r => r.classList.remove('highlight'));
+      if (key && key !== 'clear') {
+        document.querySelector(`tbody tr[data-row="${key}"]`)?.classList.add('highlight');
+      }
+    }
+
+    document.querySelectorAll('[data-highlight]').forEach(btn => {
+      btn.addEventListener('click', () => highlightRow(btn.getAttribute('data-highlight')));
+    });
+
+    // Initialize default highlight (consulting)
+    highlightRow('consulting');
+  </script>
+</body>
+</html>
