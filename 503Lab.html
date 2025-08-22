@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Public Health Data Analysis (Lab Assignments) By Dr. Chen
+</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand-1:#4c51bf; /* indigo-600 */
+      --brand-2:#6b46c1; /* purple-600 */
+      --ink:#111827;     /* gray-900 */
+      --muted:#6b7280;   /* gray-500 */
+      --bg:#f3f4f6;      /* gray-100 */
+      --card:#ffffff;
+      --ring:#e5e7eb;    /* gray-200 */
+    }
+    html,body{scroll-behavior:smooth;}
+    body{
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+    }
+    .text-gradient{
+      background:linear-gradient(90deg,var(--brand-2),var(--brand-1));
+      -webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .btn-gradient{
+      background:linear-gradient(90deg,var(--brand-2),var(--brand-1));
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .btn-gradient:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(79,70,229,.25); }
+
+    .elevate{ box-shadow:0 6px 24px rgba(0,0,0,.06); border-bottom:1px solid var(--ring); }
+
+    @media (max-width: 768px){
+      .responsive-table thead{ display:none;}
+      .responsive-table tr{ display:block; border-top:1px solid var(--ring); }
+      .responsive-table td{
+        display:grid;
+        grid-template-columns: 40% 60%;
+        gap:.5rem;
+        padding:.75rem 1rem !important;
+        white-space:normal !important;
+      }
+      .responsive-table td::before{
+        content:attr(data-label);
+        font-weight:600;
+        color:var(--muted);
+      }
+    }
+
+    .nav-link.active{ color:rgb(79 70 229); }
+    .card{background:#fff;border:1px solid var(--ring);border-radius:1rem;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+    .badge{display:inline-block;padding:.25rem .5rem;border-radius:9999px;border:1px solid var(--ring);font-size:.75rem}
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <!-- Sticky Top Navigation -->
+  <nav id="topnav" class="sticky top-0 z-50 bg-white/90 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto flex items-center justify-between py-3 px-3 sm:px-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-bold">PH</span>
+        <span class="font-extrabold tracking-tight text-lg sm:text-xl">Lab Navigator</span>
+      </div>
+      <div class="hidden md:flex items-center gap-6 font-medium text-gray-700">
+        <a href="#overview" class="nav-link hover:text-indigo-600">Overview</a>
+        <a href="#workflow" class="nav-link hover:text-indigo-600">Workflow</a>
+        <a href="#dataset" class="nav-link hover:text-indigo-600">Dataset & Tools</a>
+        <a href="#checklist" class="nav-link hover:text-indigo-600">Submission Checklist</a>
+        <a href="#qs3" class="nav-link hover:text-indigo-600">QS3</a>
+        <a href="#qs5" class="nav-link hover:text-indigo-600">QS5</a>
+        <a href="#qs6" class="nav-link hover:text-indigo-600">QS6</a>
+        <a href="#qs71" class="nav-link hover:text-indigo-600">QS7.1</a>
+        <a href="#rubrics" class="nav-link hover:text-indigo-600">Rubrics</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto bg-white p-6 sm:p-10 rounded-3xl shadow-xl border border-gray-200">
+
+    <!-- Header -->
+    <header id="overview" class="scroll-mt-28 text-center mb-12">
+      <h1 class="text-4xl sm:text-5xl font-extrabold mb-3">
+        <span class="text-gradient">Public Health Data Analysis (Lab Assignments)</span>
+      </h1>
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-700">
+        Question Sets 3, 5, 6, 7.1. Created by Dr. Brian Chen
+      </h2>
+      <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+        Step into the role of a public health data analyst to tackle critical challenges using a simulated dataset, SPSS, and Microsoft 365 Copilot. Interpret for professional and lay audiences and reflect on AI across each stage.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
+        <span class="badge bg-indigo-50 text-indigo-700">CEPH C2 • C3 • C4 • C18 • C19</span>
+        <span class="badge bg-purple-50 text-purple-700">CIDI: Clarify → Ideate → Develop → Implement</span>
+      </div>
+    </header>
+
+    <!-- Core Mission & CIDI Model -->
+    <section class="grid md:grid-cols-2 gap-6 mb-12">
+      <article class="card p-6">
+        <h3 class="text-2xl font-bold mb-2">Your Core Mission</h3>
+        <p class="text-gray-700">Analyze the Urban Health & Environmental Exposures dataset to inform program planning and policy. Select a theme (e.g., obesity, environmental exposure, mental health, chronic disease) and build skills across four modules.</p>
+      </article>
+      <article class="card p-6">
+        <h3 class="text-2xl font-bold mb-2">The CIDI Model</h3>
+        <p class="text-gray-700">Each Question Set cycles through Clarify, Ideate, and Develop. In QS7.1 you complete Implement by creating a public-facing deliverable based on your cumulative analyses.</p>
+      </article>
+    </section>
+
+    <!-- Assignment Progression & Workflow -->
+    <section id="workflow" class="scroll-mt-28 text-center mb-12">
+      <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Assignment Progression & Workflow</h3>
+      <button id="btnStart" class="btn-gradient text-white px-8 py-4 rounded-full font-bold shadow-lg">START: Choose Public Health Theme</button>
+      <div class="mt-8 grid md:grid-cols-4 gap-4">
+        <a href="#qs3" class="block card p-4 bg-indigo-50 border-indigo-200">QS3 (Descriptive Stats)</a>
+        <a href="#qs5" class="block card p-4 bg-purple-50 border-purple-200">QS5 (Relationships)</a>
+        <a href="#qs6" class="block card p-4 bg-violet-50 border-violet-200">QS6 (Group Comparisons)</a>
+        <a href="#qs71" class="block card p-4 bg-fuchsia-50 border-fuchsia-200">QS7.1 (Categorical + Synthesis)</a>
+      </div>
+      <p class="mt-6 text-gray-700">At each stage: Analyze in SPSS → Replicate in Copilot → Interpret for two audiences → Reflect on AI</p>
+    </section>
+
+    <!-- Dataset & Tools -->
+    <section id="dataset" class="scroll-mt-28 grid lg:grid-cols-2 gap-8 mb-12">
+      <article class="card p-6">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Simulated Dataset & Codebook</h3>
+        <p class="text-gray-700 mb-4">Work with the Urban Health & Environmental Exposures Survey (9,808 respondents across 15 neighborhoods). Review the codebook for variable definitions and scales before analyzing.</p>
+        <ul class="space-y-2 text-indigo-700 font-semibold">
+          <li>Data File: Urban Health & Environmental Exposures Data.xlsx</li>
+          <li>Codebook: Urban Health & Environmental Exposures Codebook.xlsx</li>
+        </ul>
+      </article>
+      <article class="card p-6">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Tools You’ll Need</h3>
+        <p class="text-gray-700">Use SPSS for primary analysis and Microsoft 365 Copilot (UIS login) to replicate and reflect. Attach both the data and codebook to your Copilot chat.</p>
+        <div class="mt-4 p-4 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-900">
+          <p class="font-semibold">Ethical Reminder</p>
+          <ul class="list-disc pl-6 text-sm mt-2">
+            <li>Verify AI outputs and cite limitations.</li>
+            <li>Note any bias, misinformation, or framing concerns.</li>
+            <li>Describe how you would mitigate issues in practice.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <!-- Submission Checklist (Responsive Table) -->
+    <section id="checklist" class="scroll-mt-28 mb-12">
+      <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-6">Submission Checklist</h3>
+      <div class="overflow-hidden rounded-xl shadow-lg border border-gray-200">
+        <table class="responsive-table min-w-full divide-y divide-gray-200 bg-white">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Question Set</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requirement Components</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Word Limit / Format</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" data-label="Question Set">QS3</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Requirement Components">Theme • RQ#1 • Variable Selection • SPSS Interpretation (Pro + Lay) • AI Reflection • AI Chat Log (PDF)</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Word Limit / Format">100–150 words; one sentence; 100–150 words; two interpretations; 300–450 words total; PDF upload</td>
+            </tr>
+            <tr class="bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" data-label="Question Set">QS5</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Requirement Components">RQ#2 • Variable Selection & Test • SPSS Interpretation (Pro + Lay) • AI Reflection • AI Chat Log (PDF)</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Word Limit / Format">One sentence; 100–150 words; two interpretations; 300–450 words total; PDF upload</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" data-label="Question Set">QS6</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Requirement Components">RQ#3 • Variable Selection & Test • SPSS Interpretation (Pro + Lay) • AI Reflection • AI Chat Log (PDF)</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Word Limit / Format">One sentence; 100–150 words; two interpretations; 300–450 words total; PDF upload</td>
+            </tr>
+            <tr class="bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" data-label="Question Set">QS7.1</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Requirement Components">RQ#4 • Variable Selection & Test • SPSS Interpretation (Pro + Lay) • AI Reflection • Final Deliverable (+50-word summary) • AI Chat Log (PDF)</td>
+              <td class="px-6 py-4 text-sm text-gray-700" data-label="Word Limit / Format">One sentence; 100–150 words; two interpretations; 300–450 words total; file/link + 50 words; PDF upload</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Question Sets as VISIBLE CARDS (no clicks) -->
+    <section id="qs3" class="scroll-mt-28 mb-10">
+      <div class="card p-6">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-1">QS3 — Descriptive Statistics</h3>
+        <p class="text-sm text-gray-600 mb-4">Frequencies • Means • SD • Counts</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Public Health Theme (100–150 words)</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Choose a theme (e.g., obesity, air quality, mental health).</li>
+              <li>Ensure your theme can be explored with the dataset's variables.
+</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Research Question #1</h4>
+            <p class="text-sm text-gray-700">Formulate a descriptive statistics question related to your selected theme. This should focus on patterns, averages, or distributions in the data.</p>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Variables & Data Collection (100–150 words)</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Based on your theme and Research Question #1, identify relevant variables from the dataset.</li>
+<li>Briefly describe an appropriate quantitative data collection method for gathering this data.</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Findings & Interpretation</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Run your analysis in SPSS, then interpret your results using your own words for both professional and lay audiences.</li>
+            </ul>
+          </div>
+ <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">AI Reflection</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Compare Copilot with SPSS, summarize their prompts, and note learning or ethical concerns.</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="qs5" class="scroll-mt-28 mb-10">
+      <div class="card p-6">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-1">QS5 — Relationships</h3>
+        <p class="text-sm text-gray-600 mb-4">One-sample t • Correlation • Simple Linear Regression</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Research Question #2</h4>
+            <p class="text-sm text-gray-700">Formulate your second research question, building on your chosen public health theme. This question should explore relationships between variables using the data.
+</p>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Variables & Appropriate Test (100–150 words)</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Based on your theme and Research Question #2, identify your dependent and independent variables from the dataset. </li>
+              <li>Select the most appropriate statistical test (e.g., one-sample t-test, correlation, or simple linear regression) and briefly justify your choice.</li>       
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Findings & Interpretation</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Run your analysis in SPSS, then interpret your results using your own words for both professional and lay audiences.</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">AI Reflection</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Compare Copilot with SPSS, summarize their prompts, and note learning or ethical concerns.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="qs6" class="scroll-mt-28 mb-10">
+      <div class="card p-6">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-1">QS6 — Group Comparisons</h3>
+        <p class="text-sm text-gray-600 mb-4">Independent t • Paired t • ANOVA</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Research Question #3</h4>
+            <p class="text-sm text-gray-700">Formulate your third research question, continuing with your public health theme. This question should involve comparing groups using the data.</p>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Variables & Appropriate Test (100–150 words)</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Based on your theme and Research Question #3, identify your dependent and independent variables using the dataset. </li>
+              <li>Then select the most appropriate statistical test (e.g., independent t-test, paired t-test, or ANOVA) and briefly justify your choice.</li>
+                   </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Findings & Interpretation</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Run your analysis in SPSS, then interpret your results using your own words for both professional and lay audiences.</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">AI Reflection</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Compare Copilot with SPSS, summarize their prompts, and note learning or ethical concerns</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="qs71" class="scroll-mt-28 mb-10">
+      <div class="card p-6">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-1">QS7.1 — Categorical Analysis & Synthesis</h3>
+        <p class="text-sm text-gray-600 mb-4">Chi-square</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Research Question #4</h4>
+            <p class="text-sm text-gray-700">Formulate your fourth research question, fitting your public health theme, involving the association between categorical variables using the data.</p>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Variables & Test (100–150 words)</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Based on your theme and Research Question #4, identify your dependent and independent variables from the dataset. </li>
+              <li>Confirm that chi-square is the appropriate test and briefly justify your choice.</li> 
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">Findings & Interpretation</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Run your analysis in SPSS, then interpret your results using your own words for both professional and lay audiences.</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-lg border border-gray-200">
+            <h4 class="font-semibold mb-2">AI Reflection</h4>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+              <li>Compare Copilot with SPSS, summarize their prompts, and note learning or ethical concerns</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rubrics -->
+    <section id="rubrics" class="scroll-mt-28">
+      <div class="card p-6">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-2">Grading Rubrics</h3>
+        <p class="text-sm text-gray-600">Each Question Set is worth <strong>30 points</strong>. The <strong>QS7.1 Final Deliverable</strong> is worth <strong>30 points</strong>.</p>
+      </div>
+
+      <!-- Rubric -->
+      <div class="card p-6 mt-4">
+        <h4 class="text-xl font-bold mb-3">Each Question Set (30 pts)</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50"><tr><th class="text-left px-4 py-2">Criterion</th><th class="text-left px-4 py-2">Points</th></tr></thead>
+            <tbody class="divide-y">
+              <tr><td class="px-4 py-2">Research Question & Variable/Test Selection/Data Collection(CEPH C2)
+</td><td class="px-4 py-2">3</td></tr>
+              <tr><td class="px-4 py-2">SPSS Analysis Execution & Output(CEPH C3)
+</td><td class="px-4 py-2">3</td></tr>
+              <tr><td class="px-4 py-2">AI Engagement & Output Inclusion(CEPH C3) 
+</td><td class="px-4 py-2">3</td></tr>
+              <tr><td class="px-4 py-2">Comparison & Reflection on AI Use(CEPH C3) 
+</td><td class="px-4 py-2">3</td></tr>
+              <tr><td class="px-4 py-2">Professional Audience Interpretation(CEPH C4) 
+</td><td class="px-4 py-2">6</td></tr>
+              <tr><td class="px-4 py-2">Lay Audience Interpretation(CEPH C4, C18, C19) 
+</td><td class="px-4 py-2">6</td></tr>
+              <tr><td class="px-4 py-2">Content & Critical Thinking</td><td class="px-4 py-2">6</td></tr>
+              <tr class="font-semibold"><td class="px-4 py-2">Total</td><td class="px-4 py-2">30</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+     
+      <!-- Final Deliverable Rubric -->
+      <div class="card p-6 mt-4">
+        <h4 class="text-xl font-bold mb-3">QS7.1 — Final Deliverable (30 pts)</h4>
+        <p class="text-sm text-gray-600 mb-2">Final Deliverable Product Rubric from Question Set 7.1, for a total of 30 points.</p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50"><tr><th class="text-left px-4 py-2">Criterion</th><th class="text-left px-4 py-2">Points</th></tr></thead>
+            <tbody class="divide-y">
+              <tr><td class="px-4 py-2">1. Synthesis of Findings</td><td class="px-4 py-2">9</td></tr>
+              <tr><td class="px-4 py-2">2. Actionable Public Health Insight(CEPH C4)
+</td><td class="px-4 py-2">9</td></tr>
+              <tr><td class="px-4 py-2">3. Audience Tailoring & Communication Quality(CEPH C18, C19) 
+</td><td class="px-4 py-2">6</td></tr>
+              <tr><td class="px-4 py-2">4. Professional Presentation & Format</td><td class="px-4 py-2">6</td></tr>
+                          <tr class="font-semibold"><td class="px-4 py-2">Total</td><td class="px-4 py-2">30</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-600">
+      <p>Content Created by Dr. Brian Chen</p>
+    </footer>
+  </main>
+
+  <!-- JS: sticky nav & scrollspy -->
+  <script>
+    const topnav = document.getElementById('topnav');
+    const elevate = () => { if (window.scrollY > 6) topnav.classList.add('elevate'); else topnav.classList.remove('elevate'); };
+    elevate(); window.addEventListener('scroll', elevate);
+
+    const sections = ['overview','workflow','dataset','checklist','qs3','qs5','qs6','qs71','rubrics'].map(id=>document.getElementById(id));
+    const links = Array.from(document.querySelectorAll('.nav-link'));
+    const activate = (id)=>{ links.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+id)); };
+    const obs = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ activate(e.target.id); } });
+    },{root:null, rootMargin:'0px 0px -70% 0px', threshold:0.25});
+    sections.forEach(s=>s && obs.observe(s));
+
+    document.getElementById('btnStart')?.addEventListener('click', ()=>{
+      document.getElementById('qs3')?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  </script>
+</body>
+</html>
