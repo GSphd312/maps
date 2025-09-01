@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive Dashboards of Diabetes by Dr. Brian Chen</title>
+<meta name="description" content="National-to-state SDOH dashboards for diabetes with AI, geospatial analysis, and HP2030 alignment." />
+<style>
+  :root{--ink:#1f2a44;--accent:#4b6bfb;--bg:#f6f8ff;--card:#ffffff;--muted:#5b6b8c;--line:#e1e6ff}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;color:#1a1a1a;background:var(--bg)}
+  /* Header */
+  header{background:linear-gradient(135deg,var(--ink),#2d3b66);color:#fff;padding:1.25rem 1rem 1.5rem;text-align:center}
+  header h1{margin:0 0 .5rem;font-weight:700;letter-spacing:.2px}
+  header p{margin:0;opacity:.9}
+  /* Nav */
+  nav{position:sticky;top:0;background:#fff;border-bottom:1px solid #e6e9f8;z-index:10000}
+  nav .inner{max-width:1500px;margin:0 auto;padding:8px 16px;display:flex;gap:8px;flex-wrap:wrap}
+  nav a{text-decoration:none;color:#1f2a44;padding:8px 12px;border-radius:10px;transition:background .15s ease}
+  nav a:hover{background:#eef2ff}
+  nav a.active{background:#e8ecff;color:#172043}
+
+  /* Main layout */
+  main{max-width:1500px;margin:0 auto;padding:28px 16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 28px rgba(32,48,96,.08);padding:20px;margin:18px 0;scroll-margin-top:96px}
+  h2{color:var(--ink);margin:4px 0 10px}
+  p.lead{color:var(--muted);margin-top:0}
+
+  /* Bullets as cards */
+  .bullet-cards{display:grid;gap:16px;margin:14px 0 18px}
+  @media (min-width: 900px){.bullet-cards{grid-template-columns:repeat(3,1fr)}}
+  .bullet-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 6px 16px rgba(32,48,96,.06)}
+  .bullet-card h3{margin:.2rem 0 .5rem;color:var(--ink);font-size:1.05rem}
+  .bullet-card h3 .dot{margin-right:.5ch}
+  .bullet-card p{margin:.3rem 0 0;color:#334169}
+
+  /* Buttons / frames */
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin:.25rem 0 1rem}
+  .btn{appearance:none;border:1px solid #cbd5ff;background:#fff;padding:.55rem .85rem;border-radius:10px;cursor:pointer;font-size:.95rem;text-decoration:none;color:#1f2a44}
+  .btn:hover{border-color:#aab6ff}
+  .frame{position:relative;width:1500px;max-width:100%;border:1px solid #d6ddff;border-radius:12px;overflow:hidden;background:#fff;margin:auto}
+  iframe{width:100%;height:100%;border:0;position:relative;z-index:1}
+  .note{font-size:.95rem;color:#3b477a;margin-top:10px}
+
+  details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+  details[open]{box-shadow:0 8px 24px rgba(32,48,96,.06)}
+  summary{cursor:pointer;font-weight:700;color:#1f2a44}
+
+  /* Footer */
+  footer{padding:28px 16px;text-align:center;color:#5d6a8a}
+</style>
+</head>
+<body>
+<header>
+  <h1>Uncovering the Factors of Diabetes:<br>A Multi-Level SDOH Analysis Using AI and Geospatial Techniques</h1>
+  <p style="font-weight:500; font-size:1rem; margin-top:0.5rem;">Brian Chen, PhD, MS, MSAS</p>
+</header>
+
+<nav aria-label="Site">
+  <div class="inner">
+    <a href="#overview">Overview</a>
+    <a href="#national">National Dashboard</a>
+    <a href="#bridge">Bridge</a>
+    <a href="#illinois">Illinois Dashboard</a>
+    <a href="#slides">Google Slides</a>
+    <a href="#feedback">Feedbacks</a>
+    <a href="#conclusion">Conclusion</a>
+  </div>
+</nav>
+
+<main>
+  <!-- Overview -->
+  <section class="panel" id="overview">
+    <h2>Overview</h2>
+    <p class="lead">Our project explores diabetes in the United States and Illinois through a two-part data analysis. We move from a high-level, data-driven perspective to actionable, local insights. We start with a national view using AI and then transition to a focused geospatial analysis of Illinois.</p>
+  </section>
+
+  <!-- National -->
+  <section class="panel" id="national">
+    <h2>Part 1: National View — AI and Environmental Factors</h2>
+    <p class="lead">
+      This dashboard highlights the social and environmental factors most associated with diabetes prevalence across U.S. counties.
+      The Food Environment Index appears as a leading signal, alongside air pollution, traffic volume, and access to parks.
+    </p>
+
+    <div class="bullet-cards" aria-label="National dashboard highlights">
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Key Findings</h3>
+        <p>Our AI model identifies the most important factors influencing diabetes prevalence. The <em>Food Environment Index</em> is the single greatest predictor, with <em>Air Pollution</em> also being highly significant. This shows that environment, especially food access, is a major driver of risk nationwide.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Visualizing Predictions</h3>
+        <p>We map the model’s predictions and compare them to observed prevalence. The <em>Prediction Accuracy</em> map spotlights counties where the model is strongest and where unmeasured factors may exist, guiding deeper public-health research.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>U.S. County Profile</h3>
+        <p>An interactive page lets you drill into any county’s raw data and context, providing a deeper look at the information behind our models.</p>
+      </article>
+    </div>
+
+    <div class="actions">
+      <a class="btn" target="_blank" rel="noopener" href="https://public.tableau.com/views/DiabetesAnalysis_17540043382640/SDOHPriorities?:showVizHome=no">Open in new tab</a>
+      <button class="btn" data-reload="#viz1">Reload</button>
+    </div>
+
+    <div class="frame">
+      <iframe id="viz1" title="National SDOH Priorities — Diabetes" style="height:1000px"
+        src="https://public.tableau.com/views/DiabetesAnalysis_17540043382640/SDOHPriorities?:embed=y&:showVizHome=no"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <p class="note">Tip: Use the toolbar in the bottom-right of the embed to download, share, or view PDF.</p>
+  </section>
+
+  <!-- Bridge -->
+  <section class="panel" id="bridge">
+    <h2>The Critical Bridge: Connecting National to State</h2>
+    <p class="lead">
+      The national AI analysis identifies broad predictors (e.g., Food Environment, Air Pollution). At the state level, we align those
+      priorities to the measures available for Illinois (e.g., food insecurity, unemployment, physical inactivity) to guide where and how to act.
+    </p>
+  </section>
+
+  <!-- Illinois -->
+  <section class="panel" id="illinois">
+    <h2>Part 2: The Illinois View — Geospatial Analysis and Actionable SDOH</h2>
+    <p class="lead">
+      The Illinois dashboard translates national signals into local levers. Explore county-level diabetes with SDOH overlays like food insecurity,
+      unemployment, and physical inactivity to identify priority areas for intervention.
+    </p>
+
+    <div class="bullet-cards" aria-label="Illinois dashboard highlights">
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>A Snapshot of the Problem</h3>
+        <p>We start with a diabetes prevalence map and identify the top and bottom counties for diabetes, giving a clear picture of key areas of concern within the state.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Investigating the Drivers</h3>
+        <p>Seven HP2030-aligned SDOH maps allow us to examine potential drivers such as unemployment, food insecurity, and physical inactivity.</p>
+      </article>
+      <article class="bullet-card">
+        <h3><span class="dot">•</span>Driving Action with Bivariate Maps</h3>
+        <p>We highlight counties with overlapping burdens (e.g., high diabetes and high food insecurity) to surface prime targets for equitable, high-return interventions.</p>
+      </article>
+    </div>
+
+    <div class="actions">
+      <a class="btn" target="_blank" rel="noopener" href="https://public.tableau.com/views/SDOH_CompetitionV3/DiabetesOverview?:showVizHome=no">Open in new tab</a>
+      <button class="btn" data-reload="#viz2">Reload</button>
+    </div>
+
+    <div class="frame">
+      <iframe id="viz2" title="Illinois Diabetes Overview" style="height:850px"
+        src="https://public.tableau.com/views/SDOH_CompetitionV3/DiabetesOverview?:embed=y&:showVizHome=no"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <p class="note">Use filters to focus on counties, compare SDOH layers, and inspect bivariate patterns.</p>
+  </section>
+
+  <!-- Slides -->
+  <section class="panel" id="slides">
+    <h2>Google Slides</h2>
+    <p class="lead">View the presentation associated with these dashboards.</p>
+    <div class="actions">
+      <a class="btn" target="_blank" rel="noopener"
+         href="https://docs.google.com/presentation/d/1sEhHdPZYfdbWCHhf38QB1m8qOkiuK5Ch/edit?usp=sharing&ouid=107202711495046224815&rtpof=true&sd=true">Open in new tab</a>
+      <button class="btn" data-reload="#slideframe">Reload</button>
+    </div>
+    <div class="frame">
+            <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQpX2nbttxhpvl90S15NQn0x40cKK6fVPPsKd1XPqFgFl8SodM71BYx29LbQ6z9HQ/pubembed?start=false&loop=false&delayms=3000" frameborder="0" width="1280" style="height:600px"
+ allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    </div>
+    <p class="note">Tip: Use the slide controls to navigate; open in a new tab for presenter view.</p>
+  </section>
+
+  <!-- Feedback -->
+  <section class="panel" id="feedback" aria-labelledby="feedback-title">
+    <h2 id="feedback-title">Feedbacks are Welcome!</h2>
+    <p class="lead">
+      Help us improve. This short survey asks about usability, clarity, and how you use these dashboards in learning, research, or decision-making.
+    </p>
+
+    <div class="actions">
+      <!-- If you have separate forms, duplicate and label two buttons -->
+      <a class="btn" target="_blank" rel="noopener"
+         href="https://uisits.co1.qualtrics.com/jfe/form/SV_1BusLtoiqwtjKcK">
+        Feedback Begins Here
+      </a>     
+    </div>
+
+   <!-- <details>
+      <summary>What we collect</summary>
+      <p style="margin-top:8px;color:#334169">
+        Responses may be analyzed in aggregate to improve dashboard usability and actionability. Do not include sensitive or identifying information in open-ended responses.
+      </p>
+    </details>-->
+  </section>
+
+  <!-- Conclusion -->
+  <section class="panel" id="conclusion">
+    <h2>Conclusion: A Powerful New Approach</h2>
+    <div>
+      <p>The National dashboard gives us our strategic priority: The &#x27;Food Environment Index&#x27; is the single most important predictor. The Illinois dashboard gives us our tactical roadmap: It uses that national insight to drill down into a local factor, &#x27;Food Insecurity,&#x27; and shows us exactly which counties need help.</p>
+      <p>Together, these dashboards provide a powerful new methodology. They allow us to move from a general understanding of the problem to a very specific, evidence-based strategy for intervention.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Presented by Brian Chen, PhD, MS, MSAS
+</footer>
+
+<script>
+  // Reload buttons for iframes
+  document.querySelectorAll('[data-reload]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const sel = btn.getAttribute('data-reload');
+      const el = document.querySelector(sel);
+      if(el && el.tagName === 'IFRAME'){ el.src = el.src; }
+    });
+  });
+
+  // Active nav link on scroll (simple IntersectionObserver)
+  const sections = Array.from(document.querySelectorAll('main > section[id]'));
+  const navLinks = Array.from(document.querySelectorAll('nav a[href^="#"]'));
+  const linkMap = new Map(navLinks.map(a=>[a.getAttribute('href').slice(1), a]));
+
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        navLinks.forEach(a=>a.classList.remove('active'));
+        const link = linkMap.get(id);
+        if(link){ link.classList.add('active'); }
+      }
+    });
+  }, {rootMargin: '-40% 0px -55% 0px', threshold: 0});
+
+  sections.forEach(sec=>observer.observe(sec));
+</script>
+</body>
+</html>
