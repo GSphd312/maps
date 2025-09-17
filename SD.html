@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Statistics Learning Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        canvas {
+            width: 100%;
+            /* height: auto; <-- This was causing a race condition on load */
+            display: block; /* Best practice for canvas elements */
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0; /* Tailwind's gray-200 */
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: white;
+            background-color: #4f46e5; /* Indigo-600 */
+            transition: background-color 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            background-color: #4338ca; /* Indigo-700 */
+        }
+        .btn-secondary {
+            background-color: #64748b; /* Slate-500 */
+        }
+        .btn-secondary:hover {
+            background-color: #475569; /* Slate-600 */
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1; /* Slate-300 */
+            padding: 0.75rem;
+            font-family: monospace;
+        }
+        textarea:focus, input[type="text"]:focus {
+            outline: 2px solid #4f46e5;
+            border-color: transparent;
+        }
+        /* Custom Message Box */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .message-box-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .message-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .message-box-overlay.visible .message-box {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Interactive Statistics Explorer</h1>
+            <p class="mt-4 text-lg text-gray-600">Learn about mean and standard deviation with hands-on examples.</p>
+        </header>
+
+        <!-- Your Data Section -->
+        <section id="your-data" class="section-card">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">1. Analyze Your Own Data</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <label for="userDataInput" class="block text-gray-700 font-semibold mb-2">Enter a comma-separated list of numbers:</label>
+                    <textarea id="userDataInput" rows="4" class="text-gray-800">5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95</textarea>
+                    <button id="calculateUserBtn" class="btn mt-4">Calculate & Visualize</button>
+                    <div id="userStats" class="mt-6 p-4 bg-indigo-50 rounded-lg space-y-2">
+                        <p class="text-gray-800"><span class="font-semibold">Mean (μ):</span> <span id="userMean">--</span></p>
+                        <p class="text-gray-800"><span class="font-semibold">Standard Deviation (σ):</span> <span id="userStdDev">--</span></p>
+                    </div>
+                </div>
+                <div>
+                    <canvas id="userChart" height="400"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Explanation Section -->
+        <section id="explanation" class="section-card">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">What Does It All Mean?</h2>
+            <div class="space-y-4 text-gray-600">
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-800">Mean (Average)</h3>
+                    <p>The mean is the most common measure of central tendency. It's calculated by summing all the numbers in a dataset and then dividing by the count of those numbers. It gives you a single value that represents the 'center' of the data.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-800">Standard Deviation (Spread)</h3>
+                    <p>Standard deviation (often abbreviated as SD or σ) measures how spread out the numbers in a dataset are from their mean. A <strong class="text-indigo-600">small standard deviation</strong> means the data points are tightly clustered around the mean. A <strong class="text-orange-600">large standard deviation</strong> indicates that the data points are spread out over a wider range of values.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenge Section -->
+        <section id="challenge" class="section-card">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">2. Challenge: Guess the Spread!</h2>
+            <p class="text-gray-600 mb-6">Look at the two datasets below. Can you tell which one has a higher standard deviation (is more 'spread out') just by looking at the charts?</p>
+            <div class="grid md:grid-cols-2 gap-8 mb-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-center text-gray-700 mb-2">Dataset A</h3>
+                    <p class="text-center font-mono text-sm text-gray-500 bg-gray-100 p-2 rounded-md mb-2">40, 45, 50, 50, 55, 60</p>
+                    <canvas id="challengeChartA" height="300"></canvas>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-center text-gray-700 mb-2">Dataset B</h3>
+                    <p class="text-center font-mono text-sm text-gray-500 bg-gray-100 p-2 rounded-md mb-2">10, 20, 50, 50, 80, 90</p>
+                    <canvas id="challengeChartB" height="300"></canvas>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="guess-form" class="flex justify-center items-center gap-6 mb-4">
+                    <label class="font-semibold text-gray-700"><input type="radio" name="guess" value="A" class="mr-2">Dataset A</label>
+                    <label class="font-semibold text-gray-700"><input type="radio" name="guess" value="B" class="mr-2">Dataset B</label>
+                </div>
+                <button id="revealAnswerBtn" class="btn">Reveal Answer</button>
+            </div>
+        </section>
+
+        <!-- Multi-Group Comparison Section -->
+        <section id="multi-group" class="section-card">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">3. Compare Multiple Groups</h2>
+            <p class="text-gray-600 mb-6">Enter data for up to three groups to see how they compare on the same chart. Statistics for each group will update as you type.</p>
+            <div class="grid md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label for="group1Input" class="block font-semibold mb-2 text-purple-700">Group 1</label>
+                    <textarea id="group1Input" rows="3" class="text-purple-800">50, 55, 60, 65, 70</textarea>
+                    <div id="group1Stats" class="mt-2 text-sm text-purple-800">Mean: --, SD: --</div>
+                </div>
+                <div>
+                    <label for="group2Input" class="block font-semibold mb-2 text-orange-700">Group 2</label>
+                    <textarea id="group2Input" rows="3" class="text-orange-800">40, 50, 60, 70, 80</textarea>
+                    <div id="group2Stats" class="mt-2 text-sm text-orange-800">Mean: --, SD: --</div>
+                </div>
+                <div>
+                    <label for="group3Input" class="block font-semibold mb-2 text-teal-700">Group 3</label>
+                    <textarea id="group3Input" rows="3" class="text-teal-800">20, 30, 60, 90, 100</textarea>
+                    <div id="group3Stats" class="mt-2 text-sm text-teal-800">Mean: --, SD: --</div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button id="visualizeMultiBtn" class="btn">Visualize Multi-Group Data</button>
+            </div>
+            <div class="mt-6">
+                <canvas id="multiGroupChart" height="450"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <!-- Message Box HTML -->
+    <div id="messageBoxOverlay" class="message-box-overlay">
+        <div class="message-box">
+            <h3 id="messageBoxTitle" class="text-xl font-bold mb-4"></h3>
+            <p id="messageBoxText" class="text-gray-600 mb-6"></p>
+            <button id="messageBoxClose" class="btn btn-secondary">Close</button>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CORE CALCULATION FUNCTIONS ---
+
+            const parseInput = (str) => {
+                if (!str) return [];
+                return str.split(',')
+                          .map(s => parseFloat(s.trim()))
+                          .filter(n => !isNaN(n));
+            };
+
+            const calculateMean = (data) => {
+                if (data.length === 0) return 0;
+                const sum = data.reduce((acc, val) => acc + val, 0);
+                return sum / data.length;
+            };
+
+            const calculateStdDev = (data, mean) => {
+                if (data.length <= 1) return 0;
+                const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / (data.length -1); // Sample Stdev
+                return Math.sqrt(variance);
+            };
+            
+            const normalPDF = (x, mean, stdDev) => {
+                if (stdDev === 0) return x === mean ? 1 : 0; // Avoid division by zero
+                const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
+                return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+            };
+
+            // --- CANVAS DRAWING FUNCTIONS ---
+            
+            const drawChart = (ctx, datasets, yAxisType = 'Frequency') => {
+                const canvas = ctx.canvas;
+                // Check if canvas is ready
+                if (!canvas.offsetWidth || !canvas.offsetHeight) {
+                    // If not ready, wait a bit and retry.
+                    requestAnimationFrame(() => drawChart(ctx, datasets, yAxisType));
+                    return;
+                }
+
+                const dpi = window.devicePixelRatio || 1;
+                canvas.width = canvas.offsetWidth * dpi;
+                canvas.height = canvas.offsetHeight * dpi;
+                ctx.scale(dpi, dpi);
+                
+                const { width, height } = {width: canvas.offsetWidth, height: canvas.offsetHeight };
+                const padding = 60;
+
+                // Combine all data for scaling
+                const allData = datasets.flatMap(d => d.data);
+                if (allData.length === 0) {
+                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                     ctx.font = '16px Inter';
+                     ctx.fillStyle = '#6b7280';
+                     ctx.textAlign = 'center';
+                     ctx.fillText('No data to display.', width / 2, height / 2);
+                     return;
+                }
+
+                const dataMin = Math.min(...allData);
+                const dataMax = Math.max(...allData);
+                const range = dataMax - dataMin;
+                
+                let xMin = dataMin - range * 0.1;
+                let xMax = dataMax + range * 0.1;
+                if (range === 0) {
+                   xMin = dataMin - 10;
+                   xMax = dataMax + 10;
+                }
+
+                // --- Histogram binning ---
+                const numBins = Math.min(Math.ceil(Math.sqrt(allData.length)) + 2, 20);
+                const binWidth = (xMax - xMin) / numBins;
+                
+                datasets.forEach(ds => {
+                    ds.bins = new Array(numBins).fill(0);
+                    for (const val of ds.data) {
+                        let binIndex = Math.floor((val - xMin) / binWidth);
+                        binIndex = Math.max(0, Math.min(binIndex, numBins - 1));
+                        ds.bins[binIndex]++;
+                    }
+                });
+
+                let yMax;
+                if (yAxisType === 'Frequency') {
+                    // Y-axis for frequency (counts)
+                    const maxFreq = Math.max(...datasets.flatMap(ds => ds.bins));
+                    yMax = maxFreq * 1.2;
+                } else {
+                    // Y-axis for percentage (density)
+                    let maxDensity = 0;
+                    datasets.forEach(ds => {
+                       if(ds.stdDev > 0) {
+                           maxDensity = Math.max(maxDensity, normalPDF(ds.mean, ds.mean, ds.stdDev));
+                       } else if(ds.data.length > 0) {
+                           maxDensity = Math.max(maxDensity, 1); // Simplified for single-value data
+                       }
+                    });
+                     yMax = maxDensity * 1.2;
+                }
+                 if(yMax === 0) yMax = 1;
+
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // --- Draw Axes ---
+                ctx.beginPath();
+                ctx.moveTo(padding, padding);
+                ctx.lineTo(padding, height - padding);
+                ctx.lineTo(width - padding, height - padding);
+                ctx.strokeStyle = '#9ca3af'; // gray-400
+                ctx.stroke();
+
+                // --- Draw Y-axis labels and grid lines ---
+                ctx.fillStyle = '#6b7280'; // gray-500
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                const numYTicks = 5;
+                for (let i = 0; i <= numYTicks; i++) {
+                    const value = (yMax / numYTicks) * i;
+                    const y = height - padding - (value / yMax) * (height - 2 * padding);
+                    ctx.fillText(yAxisType === 'Frequency' ? value.toFixed(0) : value.toFixed(2), padding - 10, y);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(padding, y);
+                    ctx.lineTo(width - padding, y);
+                    ctx.strokeStyle = '#e5e7eb'; // gray-200
+                    ctx.stroke();
+                }
+                 // Y-axis title
+                ctx.save();
+                ctx.translate(padding/3, height/2);
+                ctx.rotate(-Math.PI/2);
+                ctx.textAlign = 'center';
+                ctx.font = '14px Inter';
+                ctx.fillText(yAxisType, 0, 0);
+                ctx.restore();
+
+
+                // --- Draw X-axis labels and grid lines ---
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                const numXTicks = 5;
+                for (let i = 0; i <= numXTicks; i++) {
+                    const value = xMin + (i / numXTicks) * (xMax - xMin);
+                    const x = padding + (i / numXTicks) * (width - 2 * padding);
+                    ctx.fillText(value.toFixed(1), x, height - padding + 10);
+                }
+
+                // --- Draw Bars and Curves for each dataset ---
+                datasets.forEach(ds => {
+                    // Draw Bars (Histogram)
+                    ctx.fillStyle = ds.color + '60'; // with alpha transparency
+                    for (let i = 0; i < numBins; i++) {
+                        const binStart = xMin + i * binWidth;
+                        const x = padding + ((binStart - xMin) / (xMax - xMin)) * (width - 2 * padding);
+                        const barWidth = (binWidth / (xMax - xMin)) * (width - 2 * padding) * 0.95;
+                        
+                        let barHeight;
+                        if (yAxisType === 'Frequency') {
+                            barHeight = (ds.bins[i] / yMax) * (height - 2 * padding);
+                        } else { // Percentage
+                            const area = ds.data.length > 0 ? ds.bins[i] / ds.data.length : 0;
+                            const density = binWidth > 0 ? area / binWidth : 0;
+                            barHeight = (density / yMax) * (height - 2 * padding);
+                        }
+
+                        if(barHeight > 0) {
+                            ctx.fillRect(x, height - padding - barHeight, barWidth, barHeight);
+                        }
+                    }
+
+                    // Draw Bell Curve (Normal Distribution)
+                    ctx.beginPath();
+                    ctx.strokeStyle = ds.color;
+                    ctx.lineWidth = 2.5;
+                    let firstPoint = true;
+                    for (let px = 0; px <= width - 2 * padding; px++) {
+                        const xVal = xMin + (px / (width - 2 * padding)) * (xMax - xMin);
+                        const pdfVal = normalPDF(xVal, ds.mean, ds.stdDev);
+                        const y = height - padding - (pdfVal / yMax) * (height - 2 * padding);
+                        
+                        if (y < height - padding && y > padding) {
+                           if (firstPoint) {
+                               ctx.moveTo(padding + px, y);
+                               firstPoint = false;
+                           } else {
+                               ctx.lineTo(padding + px, y);
+                           }
+                        }
+                    }
+                    ctx.stroke();
+                    ctx.lineWidth = 1;
+                });
+                
+                // Draw Legend if multiple datasets
+                if (datasets.length > 1) {
+                    let legendX = width - padding - 100;
+                    let legendY = padding;
+                    datasets.forEach(ds => {
+                        ctx.fillStyle = ds.color;
+                        ctx.fillRect(legendX, legendY, 15, 15);
+                        ctx.fillStyle = '#374151'; // gray-700
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(ds.name, legendX + 20, legendY + 8);
+                        legendY += 25;
+                    });
+                }
+            };
+            
+
+            // --- MESSAGE BOX LOGIC ---
+            const msgBoxOverlay = document.getElementById('messageBoxOverlay');
+            const msgBoxTitle = document.getElementById('messageBoxTitle');
+            const msgBoxText = document.getElementById('messageBoxText');
+            const msgBoxCloseBtn = document.getElementById('messageBoxClose');
+
+            const showMessageBox = (title, text) => {
+                msgBoxTitle.textContent = title;
+                msgBoxText.innerHTML = text; // Use innerHTML to render bold tags
+                msgBoxOverlay.classList.add('visible');
+            }
+
+            msgBoxCloseBtn.addEventListener('click', () => msgBoxOverlay.classList.remove('visible'));
+            msgBoxOverlay.addEventListener('click', (e) => {
+                if (e.target === msgBoxOverlay) {
+                    msgBoxOverlay.classList.remove('visible');
+                }
+            });
+
+
+            // --- SECTION 1: YOUR DATA ---
+            const userDataInput = document.getElementById('userDataInput');
+            const userMeanEl = document.getElementById('userMean');
+            const userStdDevEl = document.getElementById('userStdDev');
+            const userChartCtx = document.getElementById('userChart').getContext('2d');
+
+            function handleUserAnalysis() {
+                const data = parseInput(userDataInput.value);
+                const mean = calculateMean(data);
+                const stdDev = calculateStdDev(data, mean);
+
+                userMeanEl.textContent = mean.toFixed(2);
+                userStdDevEl.textContent = stdDev.toFixed(2);
+
+                drawChart(userChartCtx, [{ data, mean, stdDev, color: '#4f46e5' }]);
+            }
+            document.getElementById('calculateUserBtn').addEventListener('click', handleUserAnalysis);
+            
+            // --- SECTION 2: CHALLENGE ---
+            const challengeDataA = [40, 45, 50, 50, 55, 60];
+            const challengeDataB = [10, 20, 50, 50, 80, 90];
+            
+            const meanA = calculateMean(challengeDataA);
+            const stdDevA = calculateStdDev(challengeDataA, meanA);
+            const meanB = calculateMean(challengeDataB);
+            const stdDevB = calculateStdDev(challengeDataB, meanB);
+
+            const challengeChartACtx = document.getElementById('challengeChartA').getContext('2d');
+            const challengeChartBCtx = document.getElementById('challengeChartB').getContext('2d');
+            
+            function drawChallengeCharts() {
+                drawChart(challengeChartACtx, [{data: challengeDataA, mean: meanA, stdDev: stdDevA, color: '#4f46e5'}]);
+                drawChart(challengeChartBCtx, [{data: challengeDataB, mean: meanB, stdDev: stdDevB, color: '#f97316'}]);
+            }
+            
+            document.getElementById('revealAnswerBtn').addEventListener('click', () => {
+                const guess = document.querySelector('input[name="guess"]:checked');
+                if (!guess) {
+                    showMessageBox('No Guess Made', 'Please select either Dataset A or Dataset B.');
+                    return;
+                }
+                
+                const isCorrect = (stdDevB > stdDevA && guess.value === 'B') || (stdDevA > stdDevB && guess.value === 'A');
+                
+                const title = isCorrect ? 'Correct! 🎉' : 'Not Quite 🤔';
+                const text = `
+                    Your guess was ${isCorrect ? 'right' : 'wrong'}.<br><br>
+                    Dataset B has the higher standard deviation, meaning its data is more spread out.
+                    <br><br>
+                    <strong>Dataset A SD:</strong> ${stdDevA.toFixed(2)}<br>
+                    <strong>Dataset B SD:</strong> ${stdDevB.toFixed(2)}
+                `;
+                showMessageBox(title, text);
+            });
+
+            // --- SECTION 3: MULTI-GROUP ---
+            const group1Input = document.getElementById('group1Input');
+            const group2Input = document.getElementById('group2Input');
+            const group3Input = document.getElementById('group3Input');
+            const group1StatsEl = document.getElementById('group1Stats');
+            const group2StatsEl = document.getElementById('group2Stats');
+            const group3StatsEl = document.getElementById('group3Stats');
+            const multiGroupChartCtx = document.getElementById('multiGroupChart').getContext('2d');
+            
+            function updateGroupStats(inputEl, statsEl) {
+                const data = parseInput(inputEl.value);
+                const mean = calculateMean(data);
+                const stdDev = calculateStdDev(data, mean);
+                statsEl.textContent = `Mean: ${mean.toFixed(2)}, SD: ${stdDev.toFixed(2)}`;
+            }
+            
+            group1Input.addEventListener('input', () => updateGroupStats(group1Input, group1StatsEl));
+            group2Input.addEventListener('input', () => updateGroupStats(group2Input, group2StatsEl));
+            group3Input.addEventListener('input', () => updateGroupStats(group3Input, group3StatsEl));
+
+            document.getElementById('visualizeMultiBtn').addEventListener('click', () => {
+                const data1 = parseInput(group1Input.value);
+                const data2 = parseInput(group2Input.value);
+                const data3 = parseInput(group3Input.value);
+
+                const datasets = [];
+
+                if (data1.length > 0) {
+                    const mean1 = calculateMean(data1);
+                    datasets.push({
+                        name: 'Group 1', data: data1, mean: mean1, stdDev: calculateStdDev(data1, mean1), color: '#8b5cf6' // purple
+                    });
+                }
+                if (data2.length > 0) {
+                    const mean2 = calculateMean(data2);
+                    datasets.push({
+                        name: 'Group 2', data: data2, mean: mean2, stdDev: calculateStdDev(data2, mean2), color: '#f97316' // orange
+                    });
+                }
+                if (data3.length > 0) {
+                    const mean3 = calculateMean(data3);
+                    datasets.push({
+                        name: 'Group 3', data: data3, mean: mean3, stdDev: calculateStdDev(data3, mean3), color: '#14b8a6' // teal
+                    });
+                }
+                
+                if (datasets.length > 0) {
+                    drawChart(multiGroupChartCtx, datasets, 'Percent');
+                } else {
+                    multiGroupChartCtx.clearRect(0,0, multiGroupChartCtx.canvas.width, multiGroupChartCtx.canvas.height);
+                }
+            });
+
+            // --- INITIALIZATION & RESPONSIVENESS ---
+            
+            function initializeApp() {
+                // Initial draw for user data
+                handleUserAnalysis();
+                // Initial draw for challenge
+                drawChallengeCharts();
+                // Initial calculation and draw for multi-group
+                updateGroupStats(group1Input, group1StatsEl);
+                updateGroupStats(group2Input, group2StatsEl);
+                updateGroupStats(group3Input, group3StatsEl);
+                document.getElementById('visualizeMultiBtn').click();
+            }
+
+            // Redraw charts on window resize
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    // Re-run all drawing functions on resize
+                    handleUserAnalysis();
+                    drawChallengeCharts();
+                    document.getElementById('visualizeMultiBtn').click();
+                }, 250); // Debounce resize event
+            });
+
+            // Initial load
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

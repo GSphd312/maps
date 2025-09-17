@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Box Plot Simulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google Font: Bricolage Grotesque -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --alpine-oat: #F0E7DA;
+      --butter-yellow: #FFEDA8;
+      --dill-stroke: #4E6813;
+      --dill-fill: rgba(78, 104, 19, 0.6);
+      --cherry-stroke: #74070E;
+      --cherry-fill: rgba(116, 7, 14, 0.7);
+      --aura-stroke: #B0A6DF;
+      --aura-fill: rgba(176, 166, 233, 0.7);
+      --bg-lower: rgba(78,104,19,0.15);
+      --bg-upper: rgba(176,166,233,0.15);
+      --bg-median: rgba(116,7,14,0.15);
+    }
+    body{ font-family: "Bricolage Grotesque", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; }
+    canvas { background: var(--alpine-oat); }
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: white;
+      color: #111827; /* Tailwind gray-900 */
+      border: 1px solid #e5e7eb; /* gray-200 */
+      border-radius: .5rem;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+      padding: .25rem .5rem;
+      font-size: .85rem;
+      white-space: nowrap;
+      z-index: 50;
+    }
+    /* Make focus outlines visible for accessibility */
+    button:focus-visible, textarea:focus-visible { outline: 3px solid #4E6813; outline-offset: 2px; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-[#F0E7DA] to-[#FFEDA8] text-gray-900">
+  <main class="max-w-5xl mx-auto p-4 md:p-8">
+    <header class="mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-[#4E6813]">Box Plot Simulation</h1>
+      <p class="text-sm md:text-base text-gray-700 mt-2">Paste comma-separated numbers, then generate a box plot with statistics, outliers, and an interactive visualization.</p>
+    </header>
+
+    <!-- Controls -->
+    <section class="bg-white/70 backdrop-blur rounded-2xl shadow p-4 md:p-6 space-y-4">
+      <label for="dataInput" class="block text-sm font-semibold text-[#4E6813]">Data (comma-separated)</label>
+      <textarea id="dataInput" rows="4"
+        class="w-full rounded-xl border border-[#B0A6DF]/60 focus:border-[#4E6813] bg-white/80 p-3"
+        placeholder="e.g., 1, 2, 2, 3, 5, 8, 13, 21">12, 15, 15, 14, 18, 19, 22, 22, 23, 24, 24, 26, 27, 28, 45</textarea>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="genBtn"
+          class="inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold text-white bg-[#4E6813] hover:brightness-110 active:translate-y-px transition"
+          type="button" aria-describedby="statusMsg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12M12 12v9m0-9a4 4 0 100-8 4 4 0 000 8z"/>
+          </svg>
+          Generate Box Plot
+        </button>
+        <span id="statusMsg" class="text-sm text-gray-600" aria-live="polite"></span>
+      </div>
+
+      <!-- Error -->
+      <div id="errorBox" class="hidden rounded-xl border border-[#74070E] bg-[#74070E]10 p-3 text-[#74070E]" role="alert" aria-live="assertive"></div>
+
+      <!-- Sorted Data -->
+      <div>
+        <h2 class="text-lg font-semibold text-[#4E6813] mb-2">Sorted Data (Ascending)</h2>
+        <div id="sortedContainer" class="flex flex-wrap gap-2 text-sm md:text-base"></div>
+        <!-- Legend -->
+        <div id="legend" class="flex items-center gap-4 mt-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-4 h-4 rounded" style="background: var(--bg-lower); border: 1px solid #4E6813"></span>
+            <span>Lower Half</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-4 h-4 rounded" style="background: var(--bg-upper); border: 1px solid #B0A6DF"></span>
+            <span>Upper Half</span>
+          </div>
+          <div id="medianLegend" class="hidden items-center gap-2">
+            <span class="inline-block w-4 h-4 rounded" style="background: var(--bg-median); border: 1px solid #74070E"></span>
+            <span>Median (Q2)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualization & Stats -->
+    <section class="grid md:grid-cols-5 gap-4 md:gap-6 mt-6">
+      <!-- Canvas -->
+      <div class="md:col-span-3 bg-white/70 backdrop-blur p-3 rounded-2xl shadow relative">
+        <canvas id="plot" class="w-full rounded-xl" height="280"></canvas>
+        <div id="tooltip" class="tooltip hidden"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="md:col-span-2 bg-white/70 backdrop-blur rounded-2xl shadow p-4">
+        <h2 class="text-lg font-semibold text-[#4E6813] mb-3">Statistics</h2>
+        <dl class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm md:text-base">
+          <dt class="font-semibold text-gray-700">n</dt><dd id="st-n" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">Minimum</dt><dd id="st-min" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">Q1 (25%)</dt><dd id="st-q1" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">Median (Q2)</dt><dd id="st-med" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">Q3 (75%)</dt><dd id="st-q3" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">Maximum</dt><dd id="st-max" class="text-gray-900">–</dd>
+          <dt class="font-semibold text-gray-700">IQR</dt><dd id="st-iqr" class="text-gray-900">–</dd>
+        </dl>
+        <div class="mt-4">
+          <h3 class="font-semibold text-[#4E6813] mb-1">Outliers (1.5 × IQR rule)</h3>
+          <p id="st-outliers" class="text-sm text-gray-800">–</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ------------------------------
+    // Utility & Statistics Functions
+    // ------------------------------
+
+    /**
+     * Parse user input string into an array of finite numbers.
+     * Handles commas, spaces, and newlines. Uses try/catch for robustness.
+     */
+    function parseNumbers(input) {
+      try {
+        const parts = input.split(/[\s,]+/).filter(Boolean);
+        const nums = parts.map(v => Number(v)).filter(v => Number.isFinite(v));
+        return nums;
+      } catch (e) {
+        return [];
+      }
+    }
+
+    /** Returns a sorted copy of the array (ascending). */
+    function sorted(arr) {
+      return [...arr].sort((a,b) => a - b);
+    }
+
+    /** Median of a sorted numeric array. If even, average the two middle values. */
+    function medianOfSorted(sortedArr) {
+      const n = sortedArr.length;
+      if (n === 0) return NaN;
+      const mid = Math.floor(n / 2);
+      if (n % 2 === 1) return sortedArr[mid];
+      return (sortedArr[mid - 1] + sortedArr[mid]) / 2;
+    }
+
+    /**
+     * Quartiles using Tukey's method:
+     * - For odd n, exclude the median from both halves.
+     * - For even n, split into halves of equal length.
+     */
+    function quartiles(sortedArr) {
+      const n = sortedArr.length;
+      const mid = Math.floor(n / 2);
+
+      let lower, upper;
+      if (n % 2 === 1) {
+        lower = sortedArr.slice(0, mid);
+        upper = sortedArr.slice(mid + 1);
+      } else {
+        lower = sortedArr.slice(0, mid);
+        upper = sortedArr.slice(mid);
+      }
+      const q1 = medianOfSorted(lower);
+      const med = medianOfSorted(sortedArr);
+      const q3 = medianOfSorted(upper);
+      return { q1, med, q3 };
+    }
+
+    /** Format numbers with up to 4 decimals without trailing zeros. */
+    function fmt(x) {
+      if (!Number.isFinite(x)) return "–";
+      const s = x.toFixed(4);
+      return s.replace(/\.?0+$/,"");
+    }
+
+    // ------------------------------
+    // DOM Elements
+    // ------------------------------
+    const txt = document.getElementById('dataInput');
+    const btn = document.getElementById('genBtn');
+    const errorBox = document.getElementById('errorBox');
+    const statusMsg = document.getElementById('statusMsg');
+
+    const stN = document.getElementById('st-n');
+    const stMin = document.getElementById('st-min');
+    const stQ1 = document.getElementById('st-q1');
+    const stMed = document.getElementById('st-med');
+    const stQ3 = document.getElementById('st-q3');
+    const stMax = document.getElementById('st-max');
+    const stIQR = document.getElementById('st-iqr');
+    const stOut = document.getElementById('st-outliers');
+
+    const sortedContainer = document.getElementById('sortedContainer');
+    const legend = document.getElementById('legend');
+    const medianLegend = document.getElementById('medianLegend');
+
+    const canvas = document.getElementById('plot');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+
+    // Responsive canvas width: match container width on load & resize
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width);
+    }
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      if (current) draw(); // re-draw with new width
+    });
+    resizeCanvas();
+
+    // ------------------------------
+    // Coloring logic for sorted data
+    // ------------------------------
+    function renderSortedDisplay(sortedArr) {
+      sortedContainer.innerHTML = "";
+      if (sortedArr.length === 0) {
+        medianLegend.classList.add('hidden');
+        return;
+      }
+      const n = sortedArr.length;
+      const odd = n % 2 === 1;
+      const mid = Math.floor(n / 2);
+
+      for (let i=0; i<n; i++) {
+        const val = sortedArr[i];
+        const span = document.createElement('span');
+        span.textContent = fmt(val);
+        span.className = "px-2 py-1 rounded-lg";
+
+        if (odd) {
+          if (i < mid) {
+            span.style.background = "var(--bg-lower)";
+          } else if (i === mid) {
+            span.style.background = "var(--bg-median)";
+            span.classList.add('font-bold');
+          } else {
+            span.style.background = "var(--bg-upper)";
+          }
+        } else {
+          if (i < mid) {
+            span.style.background = "var(--bg-lower)";
+          } else {
+            span.style.background = "var(--bg-upper)";
+          }
+        }
+        sortedContainer.appendChild(span);
+      }
+
+      // Toggle Median legend visibility
+      if (odd) {
+        medianLegend.classList.remove('hidden');
+        medianLegend.classList.add('flex');
+      } else {
+        medianLegend.classList.add('hidden');
+      }
+    }
+
+    // ------------------------------
+    // Box Plot Rendering on Canvas
+    // ------------------------------
+
+    // Drawing/animation state stored globally so we can animate outliers.
+    let current = null; // holds the latest computed state for drawing
+    let animReq = null;
+
+    /**
+     * Compute positions and drawing metadata for the box plot & points.
+     * Also prepares outlier animation parameters (phase, etc.).
+     */
+    function prepareState(values) {
+      const s = sorted(values);
+      const n = s.length;
+      const min = s[0];
+      const max = s[n-1];
+      const { q1, med, q3 } = quartiles(s);
+      const iqr = q3 - q1;
+      const lowFence = q1 - 1.5 * iqr;
+      const highFence = q3 + 1.5 * iqr;
+
+      const outliers = [];
+      const normals = [];
+      for (const v of s) {
+        if (v < lowFence || v > highFence) outliers.push(v);
+        else normals.push(v);
+      }
+
+      // Whiskers: the min and max values within fences (i.e., last non-outliers)
+      const whiskerMin = s.find(v => v >= lowFence) ?? min;
+      const whiskerMax = [...s].reverse().find(v => v <= highFence) ?? max;
+
+      // Axis range: span from min to max (pad a little if identical)
+      let domainMin = min;
+      let domainMax = max;
+      if (domainMin === domainMax) {
+        domainMin -= 1;
+        domainMax += 1;
+      }
+
+      // Canvas layout
+      const W = canvas.width;
+      const H = canvas.height;
+      const padLeft = 48;
+      const padRight = 24;
+      const padTop = 24;
+      const padBottom = 40;
+
+      const axisY = Math.round(H * 0.66);      // x-axis position
+      const boxY = Math.round(H * 0.40);       // vertical position of box
+      const boxHeight = 42;                    // box thickness
+      const midY = Math.round(boxY + boxHeight/2);
+
+      // Scale function: value -> x pixel
+      const scale = (x) => {
+        const t = (x - domainMin) / (domainMax - domainMin);
+        return padLeft + t * (W - padLeft - padRight);
+      };
+
+      // Prepare jitter & animation metadata for each point
+      // Store once so animation uses consistent jitter
+      const rng = (seed => () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296)(1234567);
+      const jitterAmp = 12; // vertical jitter for normal points
+      const outlierVosc = 3; // vertical oscillation amplitude for outliers
+
+      const points = s.map(v => {
+        const isOut = (v < lowFence || v > highFence);
+        const baseX = scale(v);
+        // Each point gets deterministic jitter based on value
+        const jitter = (rng() - 0.5) * 2 * jitterAmp;
+        const phase = rng() * Math.PI * 2; // individual phase for smooth diverse animation
+        return {
+          v, isOut,
+          x: baseX,
+          jitter,
+          phase
+        };
+      });
+
+      // Generate tick marks for axis (nice 5 ticks)
+      const ticks = niceTicks(domainMin, domainMax, 5);
+
+      return {
+        n, s, min, max, q1, med, q3, iqr, lowFence, highFence, whiskerMin, whiskerMax,
+        domainMin, domainMax,
+        layout: { W, H, padLeft, padRight, padTop, padBottom, axisY, boxY, boxHeight, midY },
+        scale,
+        points,
+        ticks
+      };
+    }
+
+    /**
+     * Compute "nice" ticks for an axis.
+     * Returns an array of tick values spanning [min, max].
+     */
+    function niceTicks(min, max, count) {
+      const span = max - min;
+      const step0 = Math.pow(10, Math.floor(Math.log10(span / Math.max(1, count))));
+      const err = (count * step0) / span;
+      let step = step0;
+      if (err <= 0.15) step = step0 * 10;
+      else if (err <= 0.35) step = step0 * 5;
+      else if (err <= 0.75) step = step0 * 2;
+      const tickStart = Math.ceil(min / step) * step;
+      const ticks = [];
+      for (let t = tickStart; t <= max + 1e-9; t += step) ticks.push(t);
+      // Ensure min/max included for better reading
+      if (ticks[0] > min) ticks.unshift(min);
+      if (ticks[ticks.length-1] < max) ticks.push(max);
+      return ticks;
+    }
+
+    /**
+     * Main draw function. Called initially and on each animation frame.
+     * Animates outlier opacity, size (radius), and slight vertical oscillation.
+     */
+    function draw(ts) {
+      if (!current) return;
+      const st = current;
+      const { W, H, axisY, boxY, boxHeight, midY, padLeft, padRight, padTop, padBottom } = st.layout;
+      const scale = st.scale;
+
+      ctx.clearRect(0,0,W,H);
+
+      // -------- Axis --------
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--dill-stroke') || '#4E6813';
+      ctx.beginPath();
+      ctx.moveTo(padLeft, axisY);
+      ctx.lineTo(W - padRight, axisY);
+      ctx.stroke();
+
+      // Ticks & labels
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#111827';
+      ctx.font = '12px "Bricolage Grotesque", sans-serif';
+      for (const t of st.ticks) {
+        const x = scale(t);
+        ctx.beginPath();
+        ctx.moveTo(x, axisY);
+        ctx.lineTo(x, axisY + 6);
+        ctx.stroke();
+        ctx.fillText(fmt(t), x, axisY + 8);
+      }
+      ctx.restore();
+
+      // -------- Box (Q1..Q3), median, whiskers --------
+      const boxLeft = scale(st.q1);
+      const boxRight = scale(st.q3);
+      const medX = scale(st.med);
+      const whiskerL = scale(st.whiskerMin);
+      const whiskerR = scale(st.whiskerMax);
+
+      // Box
+      ctx.save();
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--aura-fill') || 'rgba(176,166,233,0.7)';
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--aura-stroke') || '#B0A6DF';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.rect(boxLeft, boxY, Math.max(1, boxRight - boxLeft), boxHeight);
+      ctx.fill();
+      ctx.stroke();
+
+      // Median line
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--cherry-stroke') || '#74070E';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(medX, boxY);
+      ctx.lineTo(medX, boxY + boxHeight);
+      ctx.stroke();
+
+      // Whiskers
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--dill-stroke') || '#4E6813';
+      ctx.lineWidth = 2;
+      // left whisker line
+      ctx.beginPath();
+      ctx.moveTo(whiskerL, midY);
+      ctx.lineTo(boxLeft, midY);
+      ctx.stroke();
+      // right whisker line
+      ctx.beginPath();
+      ctx.moveTo(boxRight, midY);
+      ctx.lineTo(whiskerR, midY);
+      ctx.stroke();
+      // whisker caps
+      ctx.beginPath();
+      ctx.moveTo(whiskerL, midY - 8);
+      ctx.lineTo(whiskerL, midY + 8);
+      ctx.moveTo(whiskerR, midY - 8);
+      ctx.lineTo(whiskerR, midY + 8);
+      ctx.stroke();
+      ctx.restore();
+
+      // -------- Points (with jitter & outlier animation) --------
+      const now = ts || 0;
+      const t = now / 1000; // seconds
+      const normalRadius = 3; // smaller, per spec
+      const outlierBaseR = 6;
+      const outlierPulse = 2; // +/- size
+      const dillFill = 'rgba(78, 104, 19, 0.6)';
+      const dillStroke = '#4E6813';
+      const cherryStroke = '#74070E';
+
+      // We'll keep track of outlier screen positions for hover tooltip
+      st.hitboxes = [];
+
+      for (const p of st.points) {
+        const baseY = axisY - 24; // place points slightly above axis
+        let y = baseY + p.jitter;
+        let r = normalRadius;
+        let fill = dillFill;
+        let stroke = dillStroke;
+        let alpha = 1;
+
+        if (p.isOut) {
+          // Animate outliers: subtle vertical oscillation + pulsating size + pulsating opacity
+          const osc = Math.sin(t * 2 + p.phase); // 2 rad/s
+          const osc2 = Math.sin(t * 3 + p.phase * 1.3); // for opacity
+          y += osc * 3; // vertical oscillation amplitude
+          r = outlierBaseR + outlierPulse * ((osc + 1) / 2); // 6..8 px
+          const baseOpacity = 0.5;
+          const extra = 0.4 * ((osc2 + 1) / 2); // 0..0.4
+          alpha = baseOpacity + extra; // 0.5..0.9
+          fill = `rgba(116, 7, 14, ${alpha.toFixed(3)})`;
+          stroke = cherryStroke;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // Store hitbox for hover (use current animated radius)
+        st.hitboxes.push({ x: p.x, y, r: r + 3, value: p.v, isOut: p.isOut });
+      }
+
+      // Keep animating
+      animReq = requestAnimationFrame(draw);
+    }
+
+    // ------------------------------
+    // Tooltip on Hover (for Outliers)
+    // ------------------------------
+    canvas.addEventListener('mousemove', (ev) => {
+      if (!current || !current.hitboxes) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left;
+      const my = ev.clientY - rect.top;
+
+      // Find closest outlier under cursor
+      let found = null;
+      for (const hb of current.hitboxes) {
+        if (!hb.isOut) continue;
+        const dx = mx - hb.x;
+        const dy = my - hb.y;
+        if (Math.hypot(dx, dy) <= hb.r) { found = hb; break; }
+      }
+
+      if (found) {
+        tooltip.textContent = `Outlier: ${fmt(found.value)}`;
+        tooltip.style.left = Math.round(ev.clientX + 12) + "px";
+        tooltip.style.top = Math.round(ev.clientY + 12) + "px";
+        tooltip.classList.remove('hidden');
+      } else {
+        tooltip.classList.add('hidden');
+      }
+    });
+    canvas.addEventListener('mouseleave', () => tooltip.classList.add('hidden'));
+
+    // ------------------------------
+    // Button Handler
+    // ------------------------------
+    btn.addEventListener('click', () => {
+      errorBox.classList.add('hidden');
+      statusMsg.textContent = "";
+
+      const values = parseNumbers(txt.value);
+      if (values.length < 5) {
+        showError("Please enter at least 5 valid numbers to generate a box plot.");
+        clearStatsAndPlot();
+        return;
+      }
+
+      try {
+        const st = prepareState(values);
+        current = st;
+        renderSortedDisplay(st.s);
+        updateStats(st);
+        statusMsg.textContent = "Box plot generated.";
+        // Redraw & (re)start animation loop
+        if (animReq) cancelAnimationFrame(animReq);
+        draw();
+      } catch (e) {
+        console.error(e);
+        showError("Something went wrong while processing your data. Please check the input format.");
+        clearStatsAndPlot();
+      }
+    });
+
+    // ------------------------------
+    // Stats & Error Helpers
+    // ------------------------------
+    function updateStats(st) {
+      stN.textContent = st.n;
+      stMin.textContent = fmt(st.min);
+      stQ1.textContent = fmt(st.q1);
+      stMed.textContent = fmt(st.med);
+      stQ3.textContent = fmt(st.q3);
+      stMax.textContent = fmt(st.max);
+      stIQR.textContent = fmt(st.iqr);
+
+      const outs = st.s.filter(v => v < st.lowFence || v > st.highFence);
+      stOut.textContent = outs.length ? outs.map(fmt).join(", ") : "None";
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    function clearStatsAndPlot() {
+      // Clear stats
+      stN.textContent = stMin.textContent = stQ1.textContent = stMed.textContent =
+      stQ3.textContent = stMax.textContent = stIQR.textContent = "–";
+      stOut.textContent = "–";
+
+      // Clear sorted display
+      sortedContainer.innerHTML = "";
+      medianLegend.classList.add('hidden');
+
+      // Clear canvas
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      if (animReq) cancelAnimationFrame(animReq);
+      current = null;
+    }
+
+    // ------------------------------
+    // First render with default example
+    // ------------------------------
+    (function initialRender(){
+      const event = new Event('click');
+      btn.dispatchEvent(event);
+    })();
+  </script>
+</body>
+</html>
