@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Innovating Public Health Pedagogy through Student-Driven AI Design 
+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- GOOGLE FONTS: ROBOTO -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #F3F4F4;
+      --card-bg: #ffffff;
+      --accent: #356eff;
+      --accent-soft: #e0ebff;
+      --text-main: #222222;
+      --text-muted: #555555;
+      --border: #d6d8e0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-family: "Roboto", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      font-family: "Roboto", system-ui, sans-serif;
+    }
+
+    header {
+      background: linear-gradient(135deg, #356eff, #003366);
+      color: white;
+      padding: 1.5rem 1rem;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 300;
+    }
+
+    /* Layout: sidebar + main content (desktop) */
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 2.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    nav.sidebar {
+      width: 220px;
+      background: #ffffff;
+      border-radius: 0.9rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      padding: 0.75rem;
+      position: sticky;
+      top: 1rem;
+      z-index: 20;
+    }
+
+    .sidebar h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .nav-list a {
+      display: block;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.6rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+      font-weight: 400;
+    }
+
+    .nav-list a:hover {
+      background: #eef2ff;
+      color: #1d4ed8;
+      transform: translateX(1px);
+    }
+
+    .nav-list a.active {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    main.content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.25rem 1.25rem 1.5rem;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .tag {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Responsive embed containers */
+    .embed-box {
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: #fff;
+      margin-top: 1rem;
+    }
+
+    .responsive-iframe {
+      width: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .ratio-16x9 {
+      aspect-ratio: 16 / 9;
+    }
+
+    .ratio-doc {
+      aspect-ratio: 3 / 4;
+      min-height: 320px;
+    }
+
+    .ratio-padlet {
+      aspect-ratio: 4 / 3;
+      min-height: 320px;
+    }
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text-main);
+      transition: background 0.2s, transform 0.1s;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn-link:hover {
+      background: ##3587C0;
+      transform: translateY(-1px);
+    }
+
+    footer {
+      text-align: center;
+      color: #666;
+      font-size: 0.8rem;
+      padding: 0 1rem 1.5rem;
+    }
+
+    /* Mobile view: block layout, sticky nav, 2×2 nav grid */
+    @media (max-width: 800px) {
+
+      .page-wrap {
+        display: block;      /* no flex; avoids sticky issues */
+        padding-top: 0;
+      }
+
+      nav.sidebar {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        margin-bottom: 1rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+
+      .nav-list {
+        flex-direction: row;
+        flex-wrap: wrap;     /* wrap into two rows */
+        gap: 0.4rem;
+      }
+
+      .nav-list a {
+        flex: 1 1 48%;       /* two per row */
+        text-align: center;
+        padding: 0.6rem 0.4rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <h1>Innovating Public Health Pedagogy through Student-Driven AI Design 
+</h1>
+      <p>
+        Brian Chen, PhD, MS, MSAS(Applied Statistics)
+      </p>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <!-- SIDEBAR / TOP NAVIGATION -->
+    <nav class="sidebar">
+      <h3>Sections</h3>
+      <ul class="nav-list">
+        <li><a href="#slides" class="nav-link active">Presentation Slides</a></li>
+        <li><a href="#r2d" class="nav-link">R2-D-Luffy Activity</a></li>
+        <li><a href="#padlet" class="nav-link">Student Padlet</a></li>
+        <li><a href="#simulation" class="nav-link">Research Simulation</a></li>
+      </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+      <!-- GOOGLE SLIDES -->
+      <section class="card" id="slides">
+        <h2>Presentation Slides <span class="tag">Google Slides</span></h2>
+
+        <div class="embed-box">
+          <iframe 
+            class="responsive-iframe ratio-16x9"
+            src="https://docs.google.com/presentation/d/e/2PACX-1vRBQ0omiB5-6CZ-GDx1H_PbfLdgQAkqXCl_EgXo9nz3yAs2RFQsWfzNe4VqgHsxhqO-Dfe4ikOuYBQr/pubembed?start=false&loop=false&delayms=3000"
+            allowfullscreen="true">
+          </iframe>
+        </div>
+
+        <br />
+        <a class="btn-link btn-primary"
+           href="https://docs.google.com/presentation/d/1tSRHdR6-mC8AiKR00I1R3M8u-F1yjteJrlj5HqwD9RQ/present?usp=sharing"
+           target="_blank">
+           ↗ Open Slides in a New Tab
+        </a>
+      </section>
+
+      <!-- R2-D-LUFFY -->
+      <section class="card" id="r2d">
+        <h2>R2-D-Luffy In-Class Activity <span class="tag">MPH 503</span></h2>
+        <p>
+          Students use R2-D-Luffy as a personal AI tutor to clarify quantitative and qualitative concepts, refine prompts, and verify the accuracy of explanations.
+        </p>
+
+        <div class="embed-box">
+          <iframe
+            class="responsive-iframe ratio-doc"
+            src="https://drive.google.com/file/d/1KR9rOz1lA8xG5SKhqZB22lONzWM0g_Kw/preview"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <br />
+        <a class="btn-link btn-primary"
+           href="https://drive.google.com/file/d/1KR9rOz1lA8xG5SKhqZB22lONzWM0g_Kw/view?usp=sharing"
+           target="_blank">
+           📄 Open R2-D-Luffy Activity (Google Drive)
+        </a>
+      </section>
+
+      <!-- PADLET -->
+      <section class="card" id="padlet">
+        <h2>Statistical Spellbreakers Edition!<span class="tag">Padlet</span></h2>
+        <p>
+          Students shared their claim summaries, statistical analyses, spell names, memory spells, and an 8-second Gemini prompt illustrating the concept.
+        </p>
+
+        <div class="embed-box">
+          <iframe 
+            class="responsive-iframe ratio-padlet"
+            src="https://padlet.com/embed/bta1wl2sm9wj8efm"
+            allow="camera;microphone;geolocation;display-capture;clipboard-write">
+          </iframe>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:0.3rem;">
+          <a href="https://padlet.com?ref=embed" target="_blank" style="text-decoration:none;">
+            <img 
+              src="https://padlet.net/embeds/made_with_padlet_2022.png"
+              width="114" height="28"
+              style="border:none;vertical-align:middle"
+              alt="Made with Padlet">
+          </a>
+        </div>
+      </section>
+
+      <!-- PUBLIC HEALTH RESEARCH SIMULATION -->
+      <section class="card" id="simulation">
+        <h2>Public Health Research Simulation Using AI <span class="tag">Qualitative Analysis</span></h2>
+        <p>
+          Students analyze a simulated transcript, generate CREATE-based prompts,
+          compare AI outputs, and produce a summary table.
+        </p>
+
+        <div class="embed-box">
+          <iframe
+            class="responsive-iframe ratio-doc"
+            src="https://drive.google.com/file/d/1Tjz_w-ZF2T5MEn89ZUPyX_WuPpGndwe7/preview"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <br />
+        <a class="btn-link btn-primary"
+           href="https://drive.google.com/file/d/1Tjz_w-ZF2T5MEn89ZUPyX_WuPpGndwe7/view?usp=drive_link"
+           target="_blank">
+           📄 Open Simulation Assignment (Google Drive)
+        </a>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    © Brian Chen | htts://go.uis.edu/Brian
+  </footer>
+
+  <script>
+    const sections = document.querySelectorAll("section.card");
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    // Smooth scroll + immediate active state on click
+    navLinks.forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute("href").substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          const y = target.getBoundingClientRect().top + window.scrollY - 90;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+
+        navLinks.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+      });
+    });
+
+    // Update active link while scrolling
+    function onScroll() {
+      let current = "";
+      sections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= 120 && rect.bottom >= 120) {
+          current = sec.id;
+        }
+      });
+
+      if (current) {
+        navLinks.forEach(link => {
+          const hrefId = link.getAttribute("href").substring(1);
+          link.classList.toggle("active", hrefId === current);
+        });
+      }
+    }
+
+    document.addEventListener("scroll", onScroll);
+  </script>
+</body>
+</html>
