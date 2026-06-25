@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secondary Data Analysis in R (Chapters 25, 28-31) by Dr. Brian Chen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0A2540;      /* American Flag Blue primary */
+    --ground:#FFFFFF;    /* Clean white background */
+    --accent:#205493;    /* Secondary flag blue tone */
+    --steel:#6B7FA3;
+    --ink:#1C2D42;
+    --rule:#E6E8EC;
+    --code:#0F2537;
+    --cmt:#8794A8;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Geist",system-ui,sans-serif; font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--navy); color:var(--ground); }
+
+  .container{ width:min(1180px, 92vw); margin:0 auto; padding:34px 0 0; }
+
+  /* ---------------- main header ---------------- */
+  .eyebrow{ font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--steel); font-weight:500; }
+  .header-block{ display:grid; grid-template-columns:1fr auto; gap:28px; align-items:end;
+    border-bottom:2px solid var(--navy); padding-bottom:20px; }
+  h1{ font-family:"Geist",sans-serif; font-weight:700;
+    font-size:clamp(2.6rem,6vw,4.6rem); line-height:.92; letter-spacing:-.015em;
+    color:var(--navy); margin:.35em 0 0; max-width:16ch; }
+  h1 em{ font-style:normal; color:var(--accent); }
+  .subtitle{ margin:16px 0 0; max-width:60ch; color:var(--ink); font-size:1.05rem; }
+  .doc-details{ font-family:"Geist Mono",monospace; font-size:11px; color:var(--steel);
+    text-align:right; line-height:1.9; white-space:nowrap; }
+  .doc-details b{ color:var(--navy); font-weight:500; }
+  
+  /* Make the instructor line stand out, larger, black, and not bold */
+  .doc-details .inst { font-size: 14px; display: block; margin-bottom: 2px; }
+  .doc-details .inst b { color: #000000; font-weight: 400; }
+
+  .tracker{ margin:18px 0 4px; font-family:"Geist",sans-serif;
+    font-weight:600; font-size:15px; color:var(--navy); letter-spacing:.01em; }
+  .tracker .n{ font-family:"Geist Mono",monospace; font-size:11px; color:var(--accent); margin-right:3px; }
+  .tracker .arw{ color:var(--steel); margin:0 7px; }
+
+  /* ---------------- software setup environment ---------------- */
+  .setup-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 40px; margin:26px 0 6px;
+    border-top:1px solid var(--rule); padding-top:16px; }
+  .setup-grid .step-title{ margin-top:0; }
+
+  /* ---------------- chapter dividers ---------------- */
+  .section-head{ display:grid; grid-template-columns:96px 1fr; gap:0 24px; align-items:start;
+    margin:54px 0 18px; padding-top:18px; border-top:2px solid var(--navy); }
+  .section-head .chapter-number{ font-family:"Geist",sans-serif; font-weight:700;
+    font-size:74px; line-height:.8; color:var(--navy); letter-spacing:-.02em; }
+  .section-head h2{ font-family:"Geist",sans-serif; font-weight:700;
+    font-size:clamp(1.7rem,3.4vw,2.5rem); line-height:1; color:var(--navy);
+    margin:0; letter-spacing:-.01em; }
+  .section-head .kicker{ display:block; margin-bottom:7px; }
+  .section-head .lede{ margin:12px 0 0; max-width:66ch; color:var(--ink); font-size:1.02rem; }
+  @media (max-width:640px){ .section-head{ grid-template-columns:1fr; } .section-head .chapter-number{ font-size:54px; } }
+
+  /* ---------------- main grid blocks ---------------- */
+  .split-columns{ column-count:2; column-gap:44px; margin-top:8px; }
+  @media (max-width:760px){ .split-columns{ column-count:1; } }
+  .content-card{ break-inside:avoid; page-break-inside:avoid; padding:15px 0 17px; border-top:1px solid var(--rule); }
+  .content-card.first{ border-top:0; padding-top:4px; }
+  .wide-block{ column-span:all; }
+  .wide-block .code-pair{ display:grid; grid-template-columns:1fr 1fr; gap:0 44px; }
+  @media (max-width:760px){ .wide-block .code-pair{ grid-template-columns:1fr; } }
+
+  .step-title{ font-family:"Geist",sans-serif; font-weight:600; font-size:14.5px; color:var(--navy); margin:0 0 7px; }
+  
+  /* Scale up category heading typography inside the final reference index */
+  .split-columns .step-title { font-size: 16px; margin-bottom: 10px; }
+
+  .code-note{ margin:7px 0 0; color:var(--steel); font-size:13px; }
+  .code-note b{ color:var(--ink); font-weight:600; }
+
+  /* syntax block display */
+  pre{ margin:0; padding:2px 0 2px 14px; border-left:3px solid var(--navy);
+    font-family:"Geist Mono",monospace; font-size:13.5px; line-height:1.62;
+    color:var(--code); white-space:pre-wrap; word-break:break-word; }
+  code{ font-family:"Geist Mono",monospace; font-size:.95em; color:var(--navy); }
+  .cmt{ color:var(--cmt); }
+
+  p.body{ margin:0; color:var(--ink); font-size:14.5px; }
+  ul.run{ margin:7px 0 0; padding-left:17px; font-size:14px; color:var(--ink); }
+  ul.run li{ margin:3px 0; }
+  ul.run li b{ color:var(--navy); }
+
+  /* table lists */
+  table.data-table{ width:100%; border-collapse:collapse; margin:2px 0 0; font-size:13.5px; break-inside:avoid; page-break-inside:avoid; }
+  table.data-table th{ text-align:left; font-family:"Geist",sans-serif; font-weight:600;
+    font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--steel);
+    padding:0 14px 5px 0; border-bottom:1.5px solid var(--navy); }
+  table.data-table td{ padding:5px 14px 5px 0; border-bottom:1px solid var(--rule); vertical-align:top; color:var(--ink); }
+  table.data-table td.m{ font-family:"Geist Mono",monospace; font-size:12px; color:var(--code); }
+  table.data-table tr:last-child td{ border-bottom:0; }
+
+  /* visual highlight sidebar alerts */
+  .callout-box{ break-inside:avoid; page-break-inside:avoid; margin:16px 0; padding:2px 0 2px 16px;
+    border-left:3px solid var(--accent); font-size:14px; color:var(--ink); max-width:62ch; }
+  .callout-box b{ color:var(--navy); font-weight:600; }
+  .callout-box.steel{ border-left-color:var(--steel); }
+  .callout-box.steel b{ color:var(--navy); }
+
+  /* script index tags */
+  .src{ font-family:"Geist",sans-serif; font-weight:600; font-size:10px;
+    letter-spacing:.07em; text-transform:uppercase; padding:1px 0; }
+  .src.base{ color:var(--navy); } .src.pkg{ color:var(--steel); }
+  .src::before{ content:""; display:inline-block; width:7px; height:7px; border-radius:50%;
+    margin-right:6px; vertical-align:1px; background:currentColor; }
+
+  /* footer section */
+  footer{ margin-top:60px; background:var(--navy); color:#C7D0E2; }
+  footer .in{ width:min(1180px,92vw); margin:0 auto; padding:34px 0;
+    display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; font-size:13px; }
+  footer .sig{ font-family:"Geist",sans-serif; font-weight:700; font-size:18px; color:#fff; }
+
+  /* media queries for standard print layouts */
+  @page{ size:Letter landscape; margin:11mm; }
+  @media print{
+    body{ background:#fff; font-size:10.5pt; }
+    .container{ width:auto; padding:0; }
+    .split-columns{ column-count:3; column-gap:7mm; }
+    .section-head{ break-after:avoid; page-break-after:avoid; margin-top:7mm; }
+    .content-card, .callout-box, table{ break-inside:avoid; page-break-inside:avoid; }
+    .no-print{ display:none; }
+    footer{ background:#fff; color:var(--navy); border-top:2px solid var(--navy); }
+    h1{ font-size:30pt; }
+  }
+  .printbar{ width:min(1180px,92vw); margin:0 auto; text-align:right; }
+  .printbar button{ font-family:"Geist"; font-weight:600; font-size:11px; background:var(--navy);
+    color:#fff; border:0; border-radius:2px; padding:8px 15px; cursor:pointer; }
+  button:focus-visible, a:focus-visible{ outline:2px solid var(--navy); outline-offset:3px; }
+</style>
+</head>
+<body>
+
+<div class="printbar no-print" style="padding-top:8px"><button onclick="window.print()">Print / Save as PDF</button></div>
+
+<div class="container">
+
+  <div class="header-block">
+    <div>
+      <span class="eyebrow">Self-study lab, NHANES 2017–2018</span>
+      <h1>R Cheat Sheet: <em>Secondary Analysis</em></h1>
+      <p class="subtitle">We are taking raw NHANES data and walking through the full analysis pipeline: cleaning, descriptive stats, hypothesis testing, and regression. Remember that these are cross-sectional data, so we are looking at associations, not proving causation.</p>
+    </div>
+    <div class="doc-details">
+      <span class="inst">instructor &nbsp;<b>Dr. Brian Chen</b></span>
+      files &nbsp;<b>DEMO_J, BMX_J, BPX_J</b><br>
+      merge key &nbsp;<b>SEQN</b><br>
+      design &nbsp;<b>cross-sectional</b><br>
+      analysis &nbsp;<b>unweighted</b> (Teaching demo only)
+    </div>
+  </div>
+
+  <div class="tracker">
+    Chapter <span class="n">25</span> <span class="arw">→</span>
+    Chapter <span class="n">28</span> <span class="arw">→</span>
+    Chapter <span class="n">29</span> <span class="arw">→</span>
+    Chapter <span class="n">30</span> <span class="arw">→</span>
+    Chapter <span class="n">31</span> <span class="arw">→</span>
+    Reproducibility
+  </div>
+
+  <div class="setup-grid">
+    <div>
+      <p class="step-title">Install once</p>
+      <pre>install.packages(c("tidyverse","janitor",
+  "nhanesA","psych","car","broom",
+  "lmtest","ResourceSelection","rstatix",
+  "sandwich","FSA"))</pre>
+    </div>
+    <div>
+      <p class="step-title">Load every session</p>
+      <pre>library(tidyverse); library(janitor)
+library(nhanesA);   library(psych)
+library(car);       library(broom)
+library(lmtest);    library(ResourceSelection)</pre>
+      <p class="code-note">Call once with <code>library(pkg)</code>, or inline as <code>pkg::fun()</code>.</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">25</div>
+    <div>
+      <span class="eyebrow kicker">Chapter 25 The Core Concept</span>
+      <h2>Understanding secondary analysis</h2>
+      <p class="lede">This lab is about secondary data analysis, which means using data collected by someone else. The CDC gathered this NHANES data. Our job is to ask a new question using their variables, keeping in mind the limits of a cross-sectional design.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">What secondary data give you</p>
+      <ul class="run">
+        <li>Individual-level exam data; each file has a <b>codebook</b>.</li>
+        <li>You are limited to variables others measured.</li>
+        <li><b>Cross-sectional design</b> means we find associations, never causation.</li>
+      </ul>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">The variables this lab uses</p>
+      <table class="data-table">
+        <tr><th>Name</th><th>Meaning</th></tr>
+        <tr><td class="m">SEQN</td><td>Participant ID (merge key)</td></tr>
+        <tr><td class="m">RIDAGEYR</td><td>Age in years</td></tr>
+        <tr><td class="m">RIAGENDR</td><td>Sex (numeric → factor)</td></tr>
+        <tr><td class="m">BMXBMI</td><td>Body mass index (kg/m²)</td></tr>
+        <tr><td class="m">BPXSY1</td><td>1st systolic BP (mmHg)</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Question &amp; hypothesis</p>
+      <p class="body"><b>RQ.</b> Is obesity associated with elevated systolic BP among adult NHANES 2017–2018 participants?</p>
+      <p class="body" style="margin-top:6px"><b>H1.</b> Adults with obesity have higher SBP and higher odds of elevated BP than adults without.</p>
+      <p class="code-note">Exposure = BMI/obesity, outcome = SBP / elevated SBP, covariates = age, sex.</p>
+    </div>
+  </div>
+  <div class="callout-box">
+    <b>A quick note on survey weights.</b> NHANES uses a complex survey design. We are skipping the weights in this lab for simplicity, so frame your final write-up as an analysis of this specific sample, not the entire US population.
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">28</div>
+    <div>
+      <span class="eyebrow kicker">Chapter 28 Import, clean, merge and recode</span>
+      <h2>Data management</h2>
+      <p class="lede">Never overwrite your raw variables and always create new, derived variables for your actual analysis so your downstream code doesn't break.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">Pull the raw files</p>
+      <pre>demo_raw &lt;- nhanes("DEMO_J")  <span class="cmt"># demographics</span>
+bmx_raw  &lt;- nhanes("BMX_J")   <span class="cmt"># body measures</span>
+bpx_raw  &lt;- nhanes("BPX_J")   <span class="cmt"># blood pressure</span>
+
+nrow(demo_raw); names(demo_raw)</pre>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Tidy names, then merge on SEQN</p>
+      <pre>demo &lt;- clean_names(demo_raw)  <span class="cmt"># SEQN to seqn</span>
+bmx  &lt;- clean_names(bmx_raw)
+bpx  &lt;- clean_names(bpx_raw)
+
+adults_raw &lt;- demo %&gt;%
+  left_join(bmx, by = "seqn") %&gt;%
+  left_join(bpx, by = "seqn")
+
+anti_join(demo, bpx, by="seqn") %&gt;% nrow()</pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Which rows a join keeps</p>
+      <table class="data-table">
+        <tr><th>Join</th><th>Keeps</th></tr>
+        <tr><td class="m">left_join</td><td>all left + matches <em>(used)</em></td></tr>
+        <tr><td class="m">right_join</td><td>all right + matches</td></tr>
+        <tr><td class="m">inner_join</td><td>only matched rows</td></tr>
+        <tr><td class="m">full_join</td><td>all rows, both sides</td></tr>
+        <tr><td class="m">anti_join</td><td>left rows with no match</td></tr>
+      </table>
+      <p class="code-note">No match means new columns become <code>NA</code>.</p>
+    </div>
+    <div class="content-card wide-block">
+      <p class="step-title">Filter to adults, then derive every analysis variable</p>
+      <div class="code-pair">
+        <pre>adults &lt;- adults_raw %&gt;%
+  filter(ridageyr &gt;= 18) %&gt;%
+  transmute(
+    seqn, age = ridageyr,
+    sex = factor(riagendr,
+          levels=c("Male","Female")),
+    bmi = bmxbmi, sbp = bpxsy1,
+    obese = if_else(bmi&gt;=30, 1, 0,
+            missing = NA_real_),
+    obese_f = factor(obese, c(0,1),
+      labels=c("Not obese","Obese")),</pre>
+        <pre>    bmi_cat = case_when(
+      bmi&lt;18.5 ~ "Underweight",
+      bmi&lt;25   ~ "Normal weight",
+      bmi&lt;30   ~ "Overweight",
+      bmi&gt;=30  ~ "Obese",
+      TRUE ~ NA_character_),
+    htn = if_else(sbp&gt;=130, 1, 0,
+          missing = NA_real_),
+    htn_f = factor(htn, c(0,1),
+      labels=c("No elevated SBP",
+               "Elevated SBP"))) %&gt;%
+  drop_na(age, sex, bmi, sbp,
+          obese, bmi_cat, htn)</pre>
+      </div>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Inspect &amp; save</p>
+      <pre>nrow(adults); glimpse(adults)
+colSums(is.na(adults))   <span class="cmt"># missingness</span>
+table(adults$obese_f)    <span class="cmt"># both levels?</span>
+table(adults$bmi_cat)
+write_csv(adults, "adults_nhanes_clean.csv")</pre>
+      <p class="code-note">Derived: <code>obese / obese_f</code>, <code>bmi_cat</code>, <code>htn / htn_f</code>, <code>sex</code>.</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">29</div>
+    <div>
+      <span class="eyebrow kicker">Chapter 29 Centre, Spread, and Distribution</span>
+      <h2>Descriptive statistics</h2>
+      <p class="lede">Describe the analytic sample before comparing anything. Let the shape of each variable decide which summary is honest, using mean and SD only when the curve is roughly normal.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">Match the summary to the type</p>
+      <table class="data-table">
+        <tr><th>Type</th><th>Summarise with</th></tr>
+        <tr><td>Continuous</td><td>mean & SD; median & IQR if skewed</td></tr>
+        <tr><td>Binary / nominal</td><td>frequency &amp; %</td></tr>
+        <tr><td>Ordinal</td><td>% by category</td></tr>
+      </table>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Centre, spread, confidence interval</p>
+      <pre>adults %&gt;% summarise(
+  n=n(),
+  mean_bmi=mean(bmi), sd_bmi=sd(bmi),
+  median_bmi=median(bmi), iqr_bmi=IQR(bmi),
+  mean_sbp=mean(sbp), sd_sbp=sd(sbp))
+
+adults %&gt;% tabyl(sex) %&gt;%
+  adorn_pct_formatting()   <span class="cmt"># counts &amp; %</span>
+
+t.test(adults$bmi)$conf.int <span class="cmt"># 95% CI</span></pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">See the distribution</p>
+      <pre>hist(adults$bmi, xlab="BMI (kg/m^2)")
+boxplot(adults$sbp, ylab="SBP (mmHg)")
+
+png("output_figures/fig1.png",
+    width=800, height=600)
+hist(adults$bmi); dev.off()  <span class="cmt"># save</span></pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">The normal-curve rule</p>
+      <table class="data-table">
+        <tr><th>Within</th><th>If normal</th></tr>
+        <tr><td>± 1 SD</td><td>≈ 68%</td></tr>
+        <tr><td>± 2 SD</td><td>≈ 95%</td></tr>
+        <tr><td>± 3 SD</td><td>&gt; 99%</td></tr>
+      </table>
+      <pre>m&lt;-mean(adults$sbp); s&lt;-sd(adults$sbp)
+n&lt;-length(adults$sbp); sem&lt;-s/sqrt(n)
+mean(abs(adults$sbp-m)&lt;=s)    <span class="cmt"># ≈.68</span>
+mean(abs(adults$sbp-m)&lt;=2*s)  <span class="cmt"># ≈.95</span></pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Skew, z-score, percentile</p>
+      <pre><span class="cmt"># skewness (positive equals right tail)</span>
+skew &lt;- (sum((adults$sbp-m)^3)/n)/s^3
+adults$sbp_z &lt;- (adults$sbp-m)/s
+ecdf(adults$sbp)(140)  <span class="cmt"># pct ≤ 140</span></pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Formal normality checks</p>
+      <pre>d &lt;- psych::describe(adults$sbp)
+z_skew &lt;- d$skew     / sqrt(6/d$n)
+z_kurt &lt;- d$kurtosis / sqrt(24/d$n)  <span class="cmt"># |z|&lt;1.96 ≈ normal</span>
+
+x &lt;- if(length(adults$sbp)&gt;5000)
+  sample(adults$sbp,5000) else adults$sbp
+shapiro.test(x)</pre>
+      <p class="code-note">Both are <b>oversensitive at large n</b> — check them with visualizations, such as histogram.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Transform a skewed variable</p>
+      <pre>adults$sbp_log  &lt;- log10(adults$sbp+1)
+adults$sbp_sqrt &lt;- sqrt(adults$sbp)
+
+par(mfrow=c(1,3))
+qqnorm(adults$sbp); qqline(adults$sbp, col="red")
+par(mfrow=c(1,1))</pre>
+      <p class="code-note">Keep the version whose Q-Q points hug the line. Optional here.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Which summary to report</p>
+      <ul class="run">
+        <li><b>Approx. normal</b> → mean (SD), 95% CI.</li>
+        <li><b>Skewed / outliers</b> → median (IQR).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">30</div>
+    <div>
+      <span class="eyebrow kicker">Chapter 30, bivariate tests and nonparametric tests</span>
+      <h2>Comparative statistics</h2>
+      <p class="lede">Pick the test from the variable types, check its assumptions, and run a nonparametric test if violating the normality. With n ≈ 4,800, report both p-value and effect sizes.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">Choosing the test</p>
+      <table class="data-table">
+        <tr><th>Situation</th><th>Parametric Test to Nonparametric Test</th></tr>
+        <tr><td>2 means</td><td>t test → Wilcoxon</td></tr>
+        <tr><td>2 categoricals</td><td>chi-square → Fisher</td></tr>
+        <tr><td>3+ means</td><td>ANOVA → Kruskal-Wallis</td></tr>
+        <tr><td>2 continuous</td><td>Pearson → Spearman</td></tr>
+        <tr><td>stat vs value</td><td>1-sample t / binom</td></tr>
+      </table>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Two independent means</p>
+      <pre>adults %&gt;% group_by(obese_f) %&gt;%
+  summarise(n=n(), mean=mean(sbp), sd=sd(sbp))
+
+leveneTest(sbp ~ obese_f, data=adults)
+t.test(sbp ~ obese_f, data=adults) <span class="cmt"># Welch</span>
+wilcox.test(sbp ~ obese_f, data=adults)</pre>
+      <table class="data-table" style="margin-top:9px">
+        <tr><th>Levene</th><th>Use</th></tr>
+        <tr><td>p ≤ .05 (unequal)</td><td>Welch (default)</td></tr>
+        <tr><td>p &gt; .05 (equal)</td><td><code>var.equal=TRUE</code></td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Two categoricals</p>
+      <pre>tab &lt;- table(adults$obese_f, adults$htn_f)
+prop.table(tab, margin=1)  <span class="cmt"># row %</span>
+
+chi &lt;- chisq.test(tab)
+chi$expected; chi
+fisher.test(tab)           <span class="cmt"># if expected &lt; 5</span>
+
+sqrt(chi$statistic /        <span class="cmt"># Cramér's V</span>
+  (sum(tab)*(min(dim(tab))-1)))</pre>
+      <p class="code-note">V / φ: <b>.10</b> small, <b>.30</b> medium, <b>.50</b> large.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Three or more means</p>
+      <pre><span class="cmt"># equal variances</span>
+fit_aov &lt;- aov(sbp ~ bmi_cat, data=adults)
+summary(fit_aov); TukeyHSD(fit_aov)
+
+<span class="cmt"># unequal variances (Welch)</span>
+oneway.test(sbp ~ bmi_cat, data=adults)
+rstatix::games_howell_test(adults, sbp ~ bmi_cat)
+
+<span class="cmt"># nonparametric</span>
+kruskal.test(sbp ~ bmi_cat, data=adults)
+FSA::dunnTest(sbp ~ bmi_cat, data=adults,
+  method="bonferroni")</pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">ANOVA decision path</p>
+      <table class="data-table">
+        <tr><th>Check</th><th>Overall to post-hoc</th></tr>
+        <tr><td>Variance OK</td><td>ANOVA → Tukey HSD</td></tr>
+        <tr><td>Variance fails</td><td>Welch → Games-Howell</td></tr>
+        <tr><td>Non-normal</td><td>Kruskal → Dunn</td></tr>
+      </table>
+      <pre>rstatix::eta_squared(fit_aov)        <span class="cmt"># η²</span>
+rstatix::kruskal_effsize(adults, sbp ~ bmi_cat)</pre>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Two continuous variables</p>
+      <pre>plot(adults$bmi, adults$sbp)
+abline(lm(sbp ~ bmi, data=adults), col="red")
+
+cor.test(adults$bmi, adults$sbp, method="pearson")
+cor.test(adults$bmi, adults$sbp, method="spearman")</pre>
+      <p class="code-note"><code>r²</code> previews the simple-regression R². Association, not causation.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">A statistic vs a set value</p>
+      <pre>t.test(adults$sbp, mu=120)   <span class="cmt"># mean vs 120</span>
+binom.test(sum(adults$obese==1),
+  n=nrow(adults), p=0.40)     <span class="cmt"># prev. vs .40</span></pre>
+      <p class="code-note">Choose the reference value <b>before</b> seeing the data.</p>
+    </div>
+  </div>
+  <div class="callout-box">
+    <b>Significance is not the same as importance.</b> With n = 4,833, a Cramér's V of 0.065 still clears <em>p</em> &lt; .001. Always report effect size, direction, and CI beside the p-value. Paired and repeated-measures tests do not apply because each adult is measured once.
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">31</div>
+    <div>
+      <span class="eyebrow kicker">Chapter 31, adjusted models and diagnostics</span>
+      <h2>Regression analysis</h2>
+      <p class="lede">Fit adjusted models, check their assumptions, and interpret the estimate in plain language. We want a coefficient for continuous outcomes and an odds ratio for binary ones.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">Model by outcome type</p>
+      <table class="data-table">
+        <tr><th>Outcome</th><th>Model to estimate</th></tr>
+        <tr><td>Continuous (SBP)</td><td>linear → β coefficient</td></tr>
+        <tr><td>Binary (htn)</td><td>logistic → odds ratio</td></tr>
+      </table>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Multiple linear regression</p>
+      <pre>fit_lm &lt;- lm(sbp ~ bmi + age + sex, data=adults)
+summary(fit_lm); confint(fit_lm)
+
+broom::tidy(fit_lm, conf.int=TRUE)
+broom::glance(fit_lm)   <span class="cmt"># adj R²</span></pre>
+      <p class="code-note">β = mean change in SBP per 1-unit predictor, holding others constant.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Linear diagnostics</p>
+      <pre>car::vif(fit_lm)         <span class="cmt"># &lt;5 ok</span>
+plot(fit_lm, which=1)    <span class="cmt"># resid vs fit</span>
+plot(fit_lm, which=2)    <span class="cmt"># Q-Q</span>
+lmtest::bptest(fit_lm)   <span class="cmt"># Breusch-Pagan</span>
+max(cooks.distance(fit_lm))</pre>
+      <table class="data-table" style="margin-top:9px">
+        <tr><th>BP test</th><th>Means</th></tr>
+        <tr><td><em>p</em> &gt; .05</td><td>homoscedastic — std SE fine</td></tr>
+        <tr><td><em>p</em> &lt; .05</td><td>use robust SE</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Robust (HC3) standard errors</p>
+      <pre>library(sandwich); library(lmtest)
+coeftest(fit_lm,
+  vcov = vcovHC(fit_lm, type="HC3"))</pre>
+      <p class="code-note">Run when Breusch-Pagan is significant. Fixes SEs, not coefficients.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Multiple logistic regression</p>
+      <pre>fit_logit &lt;- glm(htn ~ obese_f+age+sex,
+  data=adults, family=binomial)
+summary(fit_logit)
+
+exp(cbind(OR=coef(fit_logit),       <span class="cmt"># ORs + CI</span>
+  confint.default(fit_logit)))
+broom::tidy(fit_logit, conf.int=TRUE,
+  exponentiate=TRUE)</pre>
+      <p class="code-note">OR for <code>obese_fObese</code> = obese vs reference. CI excluding 1 ⇔ <em>p</em> &lt; .001.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Logistic checks</p>
+      <pre>car::vif(fit_logit)
+sum(adults$htn==1) /             <span class="cmt"># events per var</span>
+  (length(coef(fit_logit))-1)
+ResourceSelection::hoslem.test(
+  adults$htn, fitted(fit_logit), g=10)
+max(cooks.distance(fit_logit))</pre>
+      <p class="code-note">Hosmer-Lemeshow is over-sensitive at large n. Check with EPV and Cook's D.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Categorical predictors (dummies)</p>
+      <pre>fit_d &lt;- lm(sbp ~ bmi_cat, data=adults)
+contrasts(adults$bmi_cat)  <span class="cmt"># see 0/1</span>
+
+adults$bmi_cat &lt;- relevel(    <span class="cmt"># new baseline</span>
+  adults$bmi_cat, ref="Normal weight")
+fit_d &lt;- lm(sbp ~ bmi_cat, data=adults)</pre>
+      <p class="code-note">n categories → n−1 dummies; omitted level = reference.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Confounding: crude vs adjusted</p>
+      <pre>fit_crude &lt;- glm(htn ~ obese_f,
+  data=adults, family=binomial)
+crude &lt;- exp(coef(fit_crude))["obese_fObese"]
+adj   &lt;- exp(coef(fit_logit))["obese_fObese"]
+(adj-crude)/crude*100   <span class="cmt"># % change</span></pre>
+      <p class="code-note">&gt; ~10% shift ⇒ possible confounding by age or sex.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Effect modification</p>
+      <pre><span class="cmt"># stratum-specific ORs by sex</span>
+by_sex &lt;- split(adults, adults$sex)
+lapply(by_sex, function(d)
+  exp(coef(glm(htn ~ obese_f+age, data=d,
+    family=binomial)))["obese_fObese"])
+
+fit_int &lt;- glm(htn ~ obese_f*sex + age,
+  data=adults, family=binomial)</pre>
+      <ul class="run">
+        <li>Strata are close to each other but distinct from crude data → <b>confounding</b>.</li>
+        <li>Strata vary significantly from one another → <b>effect modification</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout-box">
+    <b>Association is not causation.</b> Use phrases like "obesity was associated with elevated SBP" instead of saying it caused it. Cross-sectional data cannot establish a clear timeline, which is the baseline requirement for determining cause.
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">A</div>
+    <div>
+      <span class="eyebrow kicker">Appendix, cite, reproduce, share</span>
+      <h2>Reproducibility</h2>
+      <p class="lede">Treat the analysis as an open scholarship workflow. Make sure to preserve raw files, do every single change inside R, and document your steps well enough that someone else can rerun it without confusion.</p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title">Project structure</p>
+      <pre>secondary_analysis_lab/
+  data_raw/      <span class="cmt"># never edit</span>
+  data_clean/    <span class="cmt"># R output</span>
+  code/  output_tables/
+  output_figures/  dictionary/
+  manuscript/  README.txt
+
+dirs &lt;- c("data_raw","data_clean","code",
+  "output_tables","output_figures",
+  "dictionary","manuscript")
+purrr::walk(dirs, dir.create,
+  showWarnings=FALSE, recursive=TRUE)</pre>
+    </div>
+    <div class="content-card first">
+      <p class="step-title">Preserve the originals</p>
+      <pre>write_csv(demo_raw,"data_raw/DEMO_J_raw.csv")
+write_csv(adults,
+  "data_clean/nhanes_2017_2018_adults_clean.csv")</pre>
+      <p class="code-note">Never edit a CSV in Excel and resave it as the analysis file — recode in R.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">Document the work</p>
+      <p class="body">A data dictionary holds one row per analytic variable: name, label, source file, original variable, coding, and role. The README states the question, data sources, and access dates, run order, R package versions, and expected outputs.</p>
+    </div>
+    <div class="content-card">
+      <p class="step-title">When something breaks</p>
+      <table class="data-table">
+        <tr><th>Problem</th><th>Fix</th></tr>
+        <tr><td>package not found</td><td>install, then library()</td></tr>
+        <tr><td>object not found</td><td>run the script in order</td></tr>
+        <tr><td>join row blow-up</td><td>check nrow() &amp; the key</td></tr>
+        <tr><td>variable all NA</td><td>names() after clean</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="chapter-number">ƒ</div>
+    <div>
+      <span class="eyebrow kicker">Reference, base R vs package</span>
+      <h2>Quick reference: Package dependencies &amp; functions</h2>
+      <p class="lede">Every function this lab uses, including a real example call and its source. 
+        <span class="src base">Base R</span> functions are built-in and always available. 
+        <span class="src pkg">Package</span> functions are external dependencies that require loading with <code>library(pkg)</code> or calling inline as <code>pkg::fun()</code>.
+      </p>
+    </div>
+  </div>
+  <div class="split-columns">
+    <div class="content-card first">
+      <p class="step-title"><span class="src base">Base R</span>, objects, data and utilities</p>
+      <table class="data-table">
+        <tr><td class="m">library(car)</td><td>load for the session</td></tr>
+        <tr><td class="m">nrow(adults), ncol(adults)</td><td># rows / columns</td></tr>
+        <tr><td class="m">names(adults)</td><td>column names</td></tr>
+        <tr><td class="m">table(adults$obese_f)</td><td>frequency counts</td></tr>
+        <tr><td class="m">factor(x, levels=…)</td><td>build a factor</td></tr>
+        <tr><td class="m">relevel(bmi_cat, ref="…")</td><td>set reference level</td></tr>
+        <tr><td class="m">contrasts(adults$bmi_cat)</td><td>show dummy coding</td></tr>
+        <tr><td class="m">colSums(is.na(adults))</td><td>missing per column</td></tr>
+        <tr><td class="m">exp(coef(fit_logit))</td><td>log-odds → OR</td></tr>
+        <tr><td class="m">log10(x+1), sqrt(x)</td><td>transforms</td></tr>
+        <tr><td class="m">split(adults, adults$sex)</td><td>split df by group</td></tr>
+        <tr><td class="m">lapply(list, f)</td><td>apply over a list</td></tr>
+        <tr><td class="m">write.csv / read.csv</td><td>base CSV I/O</td></tr>
+      </table>
+    </div>
+    <div class="content-card first">
+      <p class="step-title"><span class="src base">Base R</span>, summaries and distributions</p>
+      <table class="data-table">
+        <tr><td class="m">mean, sd, median, IQR</td><td>centre / spread</td></tr>
+        <tr><td class="m">quantile(adults$sbp)</td><td>percentiles</td></tr>
+        <tr><td class="m">ecdf(adults$sbp)(140)</td><td>percentile of a value</td></tr>
+        <tr><td class="m">shapiro.test(x)</td><td>normality (n ≤ 5000)</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title"><span class="src base">Base R</span>, tests and models <code>{stats}</code></p>
+      <table class="data-table">
+        <tr><td class="m">t.test(y ~ g, data=adults)</td><td>2-group / 1-sample t</td></tr>
+        <tr><td class="m">wilcox.test(y ~ g)</td><td>nonparametric 2-group</td></tr>
+        <tr><td class="m">chisq.test(tab), fisher.test(tab)</td><td>independence</td></tr>
+        <tr><td class="m">binom.test(x, n, p)</td><td>proportion vs value</td></tr>
+        <tr><td class="m">cor.test(x, y, method=…)</td><td>correlation</td></tr>
+        <tr><td class="m">aov(y ~ g), TukeyHSD()</td><td>ANOVA + post-hoc</td></tr>
+        <tr><td class="m">oneway.test(y ~ g)</td><td>Welch ANOVA</td></tr>
+        <tr><td class="m">kruskal.test(y ~ g)</td><td>nonparametric ANOVA</td></tr>
+        <tr><td class="m">lm(…) , glm(..., family=binomial)</td><td>regression</td></tr>
+        <tr><td class="m">summary() , confint()</td><td>output + 95% CI</td></tr>
+        <tr><td class="m">fitted() , cooks.distance()</td><td>fitted / influence</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title"><span class="src base">Base R</span>, graphics</p>
+      <table class="data-table">
+        <tr><td class="m">hist(x) , boxplot(y ~ g)</td><td>distribution plots</td></tr>
+        <tr><td class="m">plot(x, y) , plot(fit, which=1)</td><td>scatter / diagnostics</td></tr>
+        <tr><td class="m">abline(lm(…), col="red")</td><td>add fit line</td></tr>
+        <tr><td class="m">qqnorm(x); qqline(x)</td><td>Q-Q plot</td></tr>
+        <tr><td class="m">par(mfrow=c(1,3))</td><td>panel grid</td></tr>
+        <tr><td class="m">png(…) … dev.off()</td><td>open / save device</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title"><span class="src pkg">Package</span>, dplyr <em>(tidyverse)</em></p>
+      <table class="data-table">
+        <tr><td class="m">left_join(a, b, by="seqn")</td><td>keep all left rows</td></tr>
+        <tr><td class="m">anti_join(a, b, by="seqn")</td><td>left rows, no match</td></tr>
+        <tr><td class="m">filter(df, age&gt;=18)</td><td>keep matching rows</td></tr>
+        <tr><td class="m">transmute(df, …)</td><td>new cols, drop rest</td></tr>
+        <tr><td class="m">group_by() , summarise()</td><td>group → collapse</td></tr>
+        <tr><td class="m">case_when(… ~ …)</td><td>multi-way recode</td></tr>
+        <tr><td class="m">if_else(c, a, b, missing=…)</td><td>binary recode</td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title"><span class="src pkg">Package</span>, tidyr, readr, tibble, purrr</p>
+      <table class="data-table">
+        <tr><td class="m">drop_na(df, …)</td><td>drop NA rows <em>(tidyr)</em></td></tr>
+        <tr><td class="m">write_csv() , read_csv()</td><td>tidy CSV I/O <em>(readr)</em></td></tr>
+        <tr><td class="m">glimpse(adults)</td><td>compact structure <em>(tibble)</em></td></tr>
+        <tr><td class="m">walk(dirs, dir.create)</td><td>apply, no output <em>(purrr)</em></td></tr>
+      </table>
+    </div>
+    <div class="content-card">
+      <p class="step-title"><span class="src pkg">Package</span>, modelling toolkit</p>
+      <table class="data-table">
+        <tr><td class="m">clean_names() , tabyl()</td><td>names / tables <em>(janitor)</em></td></tr>
+        <tr><td class="m">nhanes("DEMO_J")</td><td>import a cycle <em>(nhanesA)</em></td></tr>
+        <tr><td class="m">describe(adults$sbp)</td><td>skew, kurtosis <em>(psych)</em></td></tr>
+        <tr><td class="m">leveneTest() , vif()</td><td>assumptions <em>(car)</em></td></tr>
+        <tr><td class="m">games_howell_test() , eta_squared()</td><td>post-hoc / ES <em>(rstatix)</em></td></tr>
+        <tr><td class="m">tidy() , glance()</td><td>tidy output <em>(broom)</em></td></tr>
+        <tr><td class="m">bptest() , coeftest()</td><td>robust inference <em>(lmtest)</em></td></tr>
+        <tr><td class="m">vcovHC(fit, "HC3")</td><td>robust cov. <em>(sandwich)</em></td></tr>
+        <tr><td class="m">hoslem.test()</td><td>logistic fit <em>(ResourceSelection)</em></td></tr>
+        <tr><td class="m">dunnTest()</td><td>post-hoc <em>(FSA)</em></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="callout-box steel">
+    <b>Same job, two sources.</b> Saving data — base <code>write.csv()</code> vs readr <code>write_csv()</code>. Conditional recode — base <code>ifelse()</code> vs dplyr <code>if_else()</code> (stricter, keeps types). This lab uses the package versions for the tidy workflow.
+  </div>
+
+</div>
+
+<footer>
+  <div class="in">
+    <span class="sig">Secondary Data Analysis in R</span>
+    <span>Self-Study Handout: Chapters 25 & 28–31 | NHANES 2017–2018 (CDC/NCHS) | Unweighted Analysis for Teaching Demo Only</span>
+  </div>
+</footer>
+
+</body>
+</html>
