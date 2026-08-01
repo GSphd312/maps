@@ -30,6 +30,7 @@
   .credit{font-family:"Arimo",Arial,sans-serif;font-size:12px;color:var(--ink-soft);margin:0}
 
   .rail-label b{color:var(--ink);letter-spacing:.12em}
+  .rail-label.second{margin-top:0}
   .rail-label{font-family:"Arimo",Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.09em;
     text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
   .rail{display:flex;gap:8px;flex-wrap:wrap}
@@ -91,7 +92,7 @@
   .cell .big .vs{font-size:16px;font-weight:400;color:var(--ink-soft);padding:0 2px}
   .cell .note{font-size:13px;color:var(--ink-soft);line-height:1.35;margin-top:3px}
 
-  .domains{display:flex;gap:6px;flex-wrap:wrap;margin:26px 0 0}
+  .domains{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px}
   .dom{appearance:none;cursor:pointer;background:transparent;color:var(--ink-soft);
     border:1.5px solid var(--rule);border-radius:3px;padding:7px 11px;
     font-family:"Arimo",Arial,sans-serif;font-size:13px;font-weight:600;
@@ -186,7 +187,9 @@
     <p class="credit">Ba Tung (Jackey) Tran &nbsp;|&nbsp; Brian Chen, PhD</p>
   </header>
 
-  <p class="rail-label"><b>SDOH Equity Lens:</b> choose a view &amp; Healthy People 2030 Social Determinants of Health (SDOH) domains below</p>
+  <p class="rail-label">Healthy People 2030 Social Determinants of Health (SDOH) domains</p>
+  <div class="domains" role="group" aria-label="Social Determinants of Health (SDOH) domains" id="domnav"></div>
+  <p class="rail-label second"><b>SDOH Equity Lens:</b> choose a view below</p>
   <div class="rail" role="group" aria-label="Analytic views">
     <button class="tab" data-lens="benchmark" aria-pressed="false">
       <span class="swatch"></span>Benchmark distance<span class="sub">between counties</span>
@@ -225,7 +228,6 @@
     </div>
   </div>
 
-  <div class="domains" role="group" aria-label="Social Determinants of Health (SDOH) domains" id="domnav"></div>
 
   <div class="takeaway">
     <div>
@@ -298,7 +300,7 @@
 const DOMAINS = [
   {
     num:1, name:"Economic Stability: Poverty Rate", short:"Economic Stability",
-    indicator:"Poverty Rate (%), lower is better",
+    indicator:"Poverty Rate (%), a lower percentage is better",
     min:0, max:25, ticks:[0,5,10,15,20,25], fmt:v=>v.toFixed(1)+"%",
     county:8.3,
     benchmark:{v:9.2, big:"8.3% <span class=\"vs\">vs.</span> 9.2%", note:"Lake County vs. Alameda County benchmark."},
@@ -310,7 +312,7 @@ const DOMAINS = [
   },
   {
     num:2, name:"Education Access and Quality", short:"Education Access", widest:true,
-    indicator:"Bachelor Degree + (%), higher is better",
+    indicator:"Bachelor Degree + (%), a higher percentage is better",
     min:0, max:80, ticks:[0,20,40,60,80], fmt:v=>v.toFixed(1)+"%",
     county:47.7,
     benchmark:{v:52.2, big:"47.7% <span class=\"vs\">vs.</span> 52.2%", note:"Lake County vs. Alameda County benchmark."},
@@ -322,7 +324,7 @@ const DOMAINS = [
   },
   {
     num:3, name:"Health Care Access and Quality", short:"Health Care Access",
-    indicator:"Uninsured Rates (%), lower is better",
+    indicator:"Uninsured Rates (%), a lower percentage is better",
     min:0, max:20, ticks:[0,5,10,15,20], fmt:v=>v.toFixed(1)+"%",
     county:6.9,
     benchmark:{v:4.0, big:"6.9% <span class=\"vs\">vs.</span> 4%", note:"Lake County vs. Alameda County benchmark."},
@@ -334,7 +336,7 @@ const DOMAINS = [
   },
   {
     num:4, name:"Social and Community Context", short:"Social & Community",
-    indicator:"Limited English Proficiency (%), lower is better",
+    indicator:"Limited English Proficiency (%), a lower percentage is better",
     min:0, max:32, ticks:[0,10,20,30], fmt:v=>v.toFixed(1)+"%",
     county:10.6,
     benchmark:{v:17.8, big:"10.6% <span class=\"vs\">vs.</span> 17.8%", note:"Lake County vs. Alameda County benchmark."},
@@ -346,7 +348,7 @@ const DOMAINS = [
   },
   {
     num:5, name:"Neighborhood and Built Environment", short:"Neighborhood",
-    indicator:"Broadband Access (%), higher is better",
+    indicator:"Broadband Access (%), a higher percentage is better",
     min:90, max:100, ticks:[90,92,94,96,98,100], fmt:v=>v.toFixed(1)+"%",
     county:94.3,
     benchmark:{v:94.4, big:"94.3% <span class=\"vs\">vs.</span> 94.4%", note:"Lake County vs. Alameda County benchmark."},
