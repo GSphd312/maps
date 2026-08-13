@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Translating County Health Data Into Actionable SDOH Insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;800;900&family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* pulled from Template_11-Pentagon V17 */
+      --paper:#FFFFFF; --card:#FFFFFF; --ink:#26282E; --ink-soft:#5C6470; --rule:#CBD6DE;
+      --navy:#0E2841;           /* below the waterline */
+      --lake:#1A528A;           /* Lake County blue */
+      --alameda:#C22133;        /* Alameda County red */
+      --orange:#E97132;         /* poster accent */
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);
+      font-family:"Arimo",Arial,Helvetica,sans-serif;font-size:16px;line-height:1.55;
+      -webkit-font-smoothing:antialiased}
+    .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px}
+
+    header{border-bottom:3px solid var(--navy);padding-bottom:18px;margin-bottom:22px}
+    .eyebrow{font-family:"Arimo",Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;
+      text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px}
+    h1{font-family:"Figtree",sans-serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);
+      line-height:1.02;letter-spacing:-.022em;margin:0 0 12px;text-transform:uppercase;color:var(--ink)}
+    h1 em{font-style:normal;color:var(--orange)}
+    .deck{font-size:15.5px;line-height:1.5;margin:0 0 14px}
+    .credit{font-family:"Arimo",Arial,sans-serif;font-size:12px;color:var(--ink-soft);margin:0}
+
+    /* ---- intro audio ---- */
+    .introaudio{border:1.5px solid var(--rule);border-left:5px solid var(--lake);border-radius:4px;
+      padding:14px 16px 15px;margin:0 0 26px;background:var(--card)}
+    .introaudio h2{font-family:"Figtree",sans-serif;font-weight:800;text-transform:uppercase;
+      font-size:15px;letter-spacing:.01em;margin:0 0 3px;color:var(--ink)}
+    .introaudio p{margin:0 0 10px;font-size:13.5px;color:var(--ink-soft);line-height:1.4}
+    .introaudio audio{width:100%;max-width:520px;display:block}
+    .rail-label b{color:var(--ink);letter-spacing:.12em}
+    .rail-label.second{margin-top:0}
+    .rail-label{font-family:"Arimo",Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.09em;
+      text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
+    .rail{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{appearance:none;cursor:pointer;text-align:left;border:1.5px solid var(--rule);
+      background:var(--card);color:var(--ink-soft);border-radius:3px 3px 0 0;padding:9px 14px 10px;
+      font-family:"Arimo",Arial,sans-serif;font-size:14px;font-weight:600;
+      display:flex;align-items:center;gap:9px;
+      transition:transform .18s ease,background .18s ease,color .18s ease,border-color .18s ease}
+    .swatch{width:11px;height:11px;border-radius:50%;flex:none;background:currentColor;opacity:.35}
+    .tab[aria-pressed="true"]{transform:translateY(4px)}
+    .tab[aria-pressed="true"] .swatch{opacity:1;background:#fff}
+    .tab[data-lens="pairwise"]{color:var(--lake)}
+    .tab[data-lens="equity"]{color:var(--orange)}
+    .tab[data-lens="benchmark"]{color:var(--alameda)}
+    .tab[data-lens="pairwise"][aria-pressed="true"]{background:var(--lake);border-color:var(--lake);color:#fff}
+    .tab[data-lens="equity"][aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff}
+    .tab[data-lens="benchmark"][aria-pressed="true"]{background:var(--alameda);border-color:var(--alameda);color:#fff}
+    .tab:focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
+    .tab .sub{font-weight:400;font-size:12.5px;opacity:.85}
+
+    .stage{background:var(--card);border:1.5px solid var(--rule);border-radius:0 3px 3px 3px;
+      padding:20px 20px 4px;position:relative;overflow:hidden}
+    .sheet{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s ease;mix-blend-mode:multiply}
+    .sheet.on{opacity:1}
+    .sheet.pairwise{background:linear-gradient(180deg,rgba(26,82,138,.10),rgba(26,82,138,.02))}
+    .sheet.equity{background:linear-gradient(0deg,rgba(233,113,50,.13),rgba(233,113,50,.03))}
+    .sheet.benchmark{background:radial-gradient(120% 70% at 50% 55%,rgba(194,33,51,.10),rgba(194,33,51,0))}
+
+    .panel-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:2px;position:relative}
+    .panel-num{font-family:"Figtree",sans-serif;font-weight:900;font-size:34px;line-height:1;
+      color:var(--rule);letter-spacing:-.03em}
+    .panel-name{font-family:"Figtree",sans-serif;font-weight:600;font-size:19px;
+      text-transform:uppercase;letter-spacing:.01em}
+    .badge{font-family:"Arimo",Arial,sans-serif;font-size:10px;letter-spacing:.14em;
+      text-transform:uppercase;background:var(--lake);color:#fff;padding:3px 7px;border-radius:2px}
+    .indicator{font-family:"Arimo",Arial,sans-serif;font-size:15px;line-height:1.4;
+      color:var(--ink);margin:0 0 10px;position:relative}
+    .indicator b{font-weight:700;color:var(--ink-soft)}
+    svg{display:block;width:100%;height:auto;position:relative}
+    .caption{font-size:17px;font-weight:600;line-height:1.4;border-top:1px solid var(--rule);
+      margin:2px 0 0;padding:14px 0 18px;position:relative;min-height:64px}
+    .caption .cline{display:block;position:relative;padding-left:17px;margin-bottom:6px;line-height:1.4}
+    .caption .cline::before{content:"";position:absolute;left:0;top:.5em;width:9px;height:9px;border-radius:50%}
+    .caption .cline[data-lens="benchmark"]::before{background:var(--alameda)}
+    .caption .cline[data-lens="pairwise"]::before{background:var(--lake)}
+    .caption .cline[data-lens="equity"]::before{background:var(--orange)}
+    .caption .none{font-weight:400;color:var(--ink-soft)}
+    .caption .muted{display:block;font-weight:400;font-size:13.5px;color:var(--ink-soft);margin-top:5px}
+
+    .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .cell{background:var(--card);border:1.5px solid var(--rule);border-radius:3px;
+      padding:12px 13px 13px;opacity:.4;transition:opacity .25s ease,border-color .25s ease}
+    .cell.on{opacity:1}
+    .cell.on[data-lens="pairwise"]{border-color:var(--lake)}
+    .cell.on[data-lens="equity"]{border-color:var(--orange)}
+    .cell.on[data-lens="benchmark"]{border-color:var(--alameda)}
+    .cell h3{font-family:"Arimo",Arial,sans-serif;font-size:10.5px;letter-spacing:.13em;
+      text-transform:uppercase;margin:0 0 6px;font-weight:600}
+    .cell[data-lens="pairwise"] h3{color:var(--lake)}
+    .cell[data-lens="equity"] h3{color:var(--orange)}
+    .cell[data-lens="benchmark"] h3{color:var(--alameda)}
+    .cell .big{font-family:"Figtree",sans-serif;font-weight:800;font-size:25px;line-height:1.05;letter-spacing:-.02em}
+    .cell .big .unit{display:block;font-family:"Arimo",Arial,sans-serif;font-size:13.5px;
+      font-weight:700;letter-spacing:0;line-height:1.3;margin-top:2px;color:var(--ink)}
+    .cell .big .vs{font-size:16px;font-weight:400;color:var(--ink-soft);padding:0 2px}
+    .cell .note{font-size:13px;color:var(--ink-soft);line-height:1.35;margin-top:3px}
+
+    .domains{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px}
+    .dom{appearance:none;cursor:pointer;background:transparent;color:var(--ink-soft);
+      border:1.5px solid var(--rule);border-radius:3px;padding:7px 11px;
+      font-family:"Arimo",Arial,sans-serif;font-size:13px;font-weight:600;
+      display:flex;gap:7px;align-items:baseline;transition:all .16s ease}
+    .dom span{font-family:"Arimo",Arial,sans-serif;font-size:11px;opacity:.7}
+    .dom:hover{border-color:var(--ink-soft)}
+    .dom[aria-current="true"]{background:var(--lake);border-color:var(--lake);color:#fff}
+    .dom:focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
+
+    .takeaway p:last-child{margin-bottom:0}
+    .takeaway{margin-top:34px;background:var(--navy);color:#EAF4FA;border-radius:4px;
+      padding:26px 26px 20px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+    .takeaway h2{font-family:"Figtree",sans-serif;font-weight:800;text-transform:uppercase;
+      font-size:19px;line-height:1.1;letter-spacing:-.01em;margin:0 0 7px;color:var(--orange)}
+    .takeaway p{margin:0 0 8px;font-size:14.5px;line-height:1.4;color:#D6E6F2}
+    .takeaway .lede{color:#FFFFFF;font-size:17px;font-weight:600;line-height:1.3;margin-bottom:9px}
+    .takeaway .gloss{font-size:13px;color:#A9C6DA}
+    .takeaway .gloss b{color:#FFFFFF;font-weight:700}
+    .takeaway h2 small{font-size:12.5px;font-weight:600;letter-spacing:.01em;text-transform:none;color:#8FB6CE}
+    .takeaway h2.second{margin-top:16px}
+    /* ---- poster embed (self-contained: move this block + its markup together) ---- */
+    .poster{margin-top:34px;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+      gap:26px;align-items:start}
+    .poster figure{margin:0}
+    .poster .frame{appearance:none;padding:0;cursor:zoom-in;display:block;width:100%;
+      background:var(--card);border:1.5px solid var(--rule);border-radius:4px;overflow:hidden;
+      transition:border-color .18s ease}
+    .poster .frame:hover{border-color:var(--lake)}
+    .poster .frame:focus-visible{outline:2.5px solid var(--navy);outline-offset:3px}
+    .poster .frame img{display:block;width:100%;height:auto}
+    .poster figcaption{font-size:12px;color:var(--ink-soft);margin-top:7px}
+    .poster h2{font-family:"Figtree",sans-serif;font-weight:800;text-transform:uppercase;
+      font-size:19px;line-height:1.1;letter-spacing:-.01em;margin:0 0 8px}
+    .poster p{font-size:14.5px;line-height:1.45;margin:0 0 12px}
+    .cmp{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13.5px}
+    .cmp th,.cmp td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule);
+      vertical-align:top;line-height:1.35}
+    .cmp thead th{font-family:"Figtree",sans-serif;font-weight:800;font-size:12.5px;
+      border-bottom:2px solid var(--navy);padding-bottom:6px}
+    .cmp thead th.lake{color:var(--lake)}
+    .cmp thead th.alameda{color:var(--alameda)}
+    .cmp tbody th{font-weight:400;color:var(--ink-soft);width:34%}
+    .cmp tbody td{font-weight:700}
+    .cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:none}
+    .cmp tbody tr:last-child td{font-weight:400;color:var(--ink-soft);font-size:12.5px}
+    .poster .acts{display:flex;gap:8px;flex-wrap:wrap}
+    .poster .act{font-family:"Arimo",Arial,sans-serif;font-size:13px;font-weight:700;
+      text-decoration:none;border:1.5px solid var(--rule);border-radius:3px;padding:8px 13px;
+      color:var(--ink);background:var(--card);transition:all .16s ease}
+    .poster .act:hover{border-color:var(--lake);color:var(--lake)}
+    .poster .act.primary{background:var(--lake);border-color:var(--lake);color:#fff}
+    .poster .act.primary:hover{background:var(--navy);border-color:var(--navy);color:#fff}
+
+    .lightbox{position:fixed;inset:0;z-index:50;display:none;background:rgba(14,40,65,.94);
+      padding:52px 16px 16px;overflow:auto;overscroll-behavior:contain}
+    .lightbox[open]{display:block}
+    .lightbox img{display:block;margin:0 auto;max-width:100%;height:auto;cursor:zoom-in;
+      box-shadow:0 8px 40px rgba(0,0,0,.45)}
+    .lightbox.zoomed img{max-width:none;cursor:zoom-out}
+    .lightbox .close{position:fixed;top:12px;right:14px;appearance:none;cursor:pointer;
+      font-family:"Arimo",Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;
+      text-transform:uppercase;background:#fff;color:var(--navy);border:none;border-radius:3px;
+      padding:9px 14px}
+    .lightbox .hint{position:fixed;top:16px;left:16px;font-size:12px;color:#B9D2E4;
+      letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+    @media(max-width:680px){
+      .poster{grid-template-columns:1fr;gap:16px}
+      .lightbox .hint{display:none}
+    }
+    .refhead{display:block;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+      font-size:10.5px;margin-bottom:5px}
+    .refs{list-style:none;margin:0;padding:0;counter-reset:ref}
+    .refs li{counter-increment:ref;padding-left:1.6em;text-indent:-1.6em;margin-bottom:3px}
+    .refs li::before{content:counter(ref) ". ";display:inline-block;width:1.6em;text-indent:0}
+    sup{font-weight:700;padding-left:1px}
+    .refs a{color:var(--lake);text-decoration:none;word-break:break-all}
+    .refs a:hover{text-decoration:underline}
+    footer{margin-top:30px;border-top:1px solid var(--rule);padding-top:14px;
+      font-family:"Arimo",Arial,sans-serif;font-size:11px;line-height:1.6;color:var(--ink-soft)}
+    @media(max-width:680px){
+      .readout{grid-template-columns:1fr}
+      .takeaway{grid-template-columns:1fr;gap:14px}
+      .tab .sub{display:none}
+    }
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Translating County Health Data Into Actionable SDOH Insights <em>For Illinois Communities</em></h1>
+    <p class="deck">Using a purposive comparative-case design,<sup>1</sup> we selected two metropolitan counties with comparable Hispanic representation, Black population shares, and high median household incomes. We then examined five Social Determinants of Health (SDOH) domains to identify place-based and within-county subgroup disparities through an equity lens.<sup>2</sup></p>
+    <p class="credit">Ba Tung (Jackey) Tran &nbsp;|&nbsp; Brian Chen, PhD</p>
+  </header>
+
+  <section class="introaudio">
+    <h2>Audio introduction</h2>
+    <p>A three-minute spoken walkthrough of the project. Headphones recommended if you are on the conference floor.</p>
+    <audio controls preload="none" src="images/intro.mp3">
+      Your browser does not support audio playback.
+      <a href="images/intro.mp3">Download the audio introduction (MP3)</a>.
+    </audio>
+  </section>
+
+  <p class="rail-label">Healthy People 2030 Social Determinants of Health (SDOH) domains</p>
+  <div class="domains" role="group" aria-label="Social Determinants of Health (SDOH) domains" id="domnav"></div>
+  <p class="rail-label second"><b>SDOH Equity Lens:</b> choose a view below</p>
+  <div class="rail" role="group" aria-label="Analytic views">
+    <button class="tab" data-lens="benchmark" aria-pressed="false">
+      <span class="swatch"></span>Benchmark distance<span class="sub">between counties</span>
+    </button>
+    <button class="tab" data-lens="pairwise" aria-pressed="false">
+      <span class="swatch"></span>Pairwise<span class="sub">within county</span>
+    </button>
+    <button class="tab" data-lens="equity" aria-pressed="false">
+      <span class="swatch"></span>Equity gap<span class="sub">vs highest-performing group</span>
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="sheet pairwise" id="sheet-pairwise"></div>
+    <div class="sheet equity" id="sheet-equity"></div>
+    <div class="sheet benchmark" id="sheet-benchmark"></div>
+    <div class="panel-head">
+      <span class="panel-num" id="pnum">1</span>
+      <span class="panel-name" id="pname"></span>
+      <span class="badge" id="pbadge" hidden>Widest gap</span>
+    </div>
+    <p class="indicator" id="pind"></p>
+    <svg id="chart" viewBox="0 0 800 350" role="img" aria-labelledby="chart-desc"></svg>
+    <p class="caption" id="cap"></p>
+  </div>
+
+  <div class="readout">
+    <div class="cell" data-lens="benchmark" id="cell-benchmark">
+      <h3>Benchmark distance</h3><div class="big">—</div><div class="note"></div>
+    </div>
+    <div class="cell" data-lens="pairwise" id="cell-pairwise">
+      <h3>Pairwise</h3><div class="big">—</div><div class="note"></div>
+    </div>
+    <div class="cell" data-lens="equity" id="cell-equity">
+      <h3>Equity gap</h3><div class="big">—</div><div class="note"></div>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <div>
+      <h2>Benchmark Distance View <small>(between counties)</small></h2>
+      <p>Compares Lake County, IL with Alameda County, CA across the five Healthy People 2030 Social Determinants of Health (SDOH) domains. County averages from benchmark distance look similar.</p>
+      <h2 class="second">Pairwise and Equity Gap <small>(within county gap)</small></h2>
+      <p>Compares subgroup rates and measures each subgroup's distance from the county's highest-performing group (HPG). This view reveals priority inequities.<sup>3</sup> Disparities within Lake exceed Alameda's in four domains.</p>
+    </div>
+    <div>
+      <h2>From data to action</h2>
+      <p>Benchmarks show how Lake County compares. Equity gaps show who's left behind: Hispanic residents are 11.5&times; as likely to face a language barrier and 5.7&times; as likely to be uninsured. These gaps point to bilingual navigators and enrollment outreach, with cross-sector partners.</p>
+      <p class="lede">The Benchmark Distance View describes conditions. Equity lenses reveal priorities.</p>
+    </div>
+  </div>
+
+  <!-- ===== POSTER EMBED ===== -->
+  <section class="poster">
+    <figure>
+      <button class="frame" id="posterBtn" aria-label="Open the full-size poster">
+        <img src="images/poster-web.jpg" width="1584" height="2112"
+             alt="Conference poster: Translating County Health Data Into Actionable SDOH Insights For Illinois Communities. Lake County, IL compared with Alameda County, CA across five Healthy People 2030 Social Determinants of Health (SDOH) domains, with benchmark distance, pairwise and equity gap views. All figures appear as text on this page.">
+      </button>
+      <figcaption>Conference poster, 36&times;48 inch. Click to enlarge.</figcaption>
+    </figure>
+    <div>
+      <h2>The comparison</h2>
+      <p>Two metropolitan counties with comparable Hispanic representation, Black population shares, and high median household incomes.</p>
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col" class="lake">Lake County, IL</th>
+            <th scope="col" class="alameda">Alameda County, CA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Population</th><td>714,223</td><td>1,649,473</td></tr>
+          <tr><th scope="row">Median household income</th><td>$110,416</td><td>$129,367</td></tr>
+          <tr><th scope="row">Black, non-Hispanic population</th><td>7%</td><td>10%</td></tr>
+          <tr><th scope="row">Hispanic/Latino population</th><td>25%</td><td>23%</td></tr>
+          <tr>
+            <th scope="row">Setting</th>
+            <td>Large suburban county in the Chicago metropolitan area</td>
+            <td>Large urban county in the San Francisco Bay Area</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="acts">
+        <button class="act primary" id="posterBtn2">View full size</button>
+        <a class="act" href="images/poster-full.jpg" download>Download poster (JPG)</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Full-size poster">
+    <span class="hint">Click image to zoom. Esc to close.</span>
+    <button class="close" id="lbClose">Close</button>
+    <img id="lbImg" alt="Full-size conference poster">
+  </div>
+  <!-- ===== END POSTER EMBED ===== -->
+
+  <footer>
+    <span class="refhead">References</span>
+    <ol class="refs">
+      <li>Seawright J, Gerring J. Case selection techniques in case study research: a menu of qualitative and quantitative options. <i>Polit Res Q.</i> 2008;61(2):294-308.</li>
+      <li>U.S. Census Bureau, American Community Survey, 2020–2024 5-Year Estimates.</li>
+      <li>Centers for Disease Control and Prevention. Health disparity measures. Stephen B. Thacker CDC Library. Reviewed May 16, 2024. Accessed August 1, 2026. <a href="https://www.cdc.gov/library/research-guides/health-disparity-measures.html" target="_blank" rel="noopener noreferrer">https://www.cdc.gov/library/research-guides/health-disparity-measures.html</a></li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+const DOMAINS = [
+  {
+    num:1, name:"Economic Stability", short:"Economic Stability",
+    indicator:"Poverty Rate (%), a lower percentage is better", phrase:"poverty rate is 8.3%",
+    min:0, max:25, ticks:[0,5,10,15,20,25], fmt:v=>v.toFixed(1)+"%",
+    county:8.3,
+    benchmark:{v:9.2, big:"8.3% <span class=\"vs\">vs.</span> 9.2%", note:"Lake County vs. Alameda County benchmark."},
+    equity:{hpg:"Asian", hpgV:4.3, worst:"Black", worstV:21.8, gapLabel:"Black vs highest-performing group", big:"17.5 <span class=\"unit\">percentage-point gap (ppg)</span>", chart:"17.5 percentage-point gap",
+            note:"Black residents vs the highest-performing group. Alameda's gap: 10.1 percentage points."},
+    pairwise:{aL:"White, non-Hispanic", aV:5.1, bL:"Black", bV:21.8, big:"4.3×",
+            note:"Poverty: Black residents are 4.3× as likely."},
+    caps:{benchmark:"Lake County 8.3%, Alameda County 9.2%. Lake County is 0.9 percentage points lower.",pairwise:"Black residents are 4.3× as likely to live below the federal poverty line as White, non-Hispanic residents.",equity:"Black residents sit 17.5 percentage points from the highest-performing group (Asian, 4.3%)."}
+  },
+  {
+    num:2, name:"Education Access and Quality", short:"Education Access", widest:true,
+    indicator:"Bachelor's degree or higher, adults 25+ (%), a higher percentage is better", phrase:"share of adults 25+ with a bachelor's degree or higher is 47.7%",
+    min:0, max:80, ticks:[0,20,40,60,80], fmt:v=>v.toFixed(1)+"%",
+    county:47.7,
+    benchmark:{v:52.2, big:"47.7% <span class=\"vs\">vs.</span> 52.2%", note:"Lake County vs. Alameda County benchmark."},
+    equity:{hpg:"Asian", hpgV:73.8, worst:"Hispanic", worstV:17.2, gapLabel:"Hispanic vs highest-performing group", big:"56.6 <span class=\"unit\">percentage-point gap (ppg)</span>", chart:"56.6 percentage-point gap",
+            note:"Hispanic vs the highest-performing group. Widest gap. Alameda's gap: 40.3 percentage points."},
+    pairwise:{aL:"Hispanic", aV:17.2, bL:"White, non-Hispanic", bV:56.1, big:"0.3×",
+            note:"Degrees: Hispanic adults at one-third the rate."},
+    caps:{benchmark:"Lake County 47.7%, Alameda County 52.2%. Lake County is 4.5 percentage points lower.",pairwise:"Hispanic adults hold a bachelor's degree or higher at 0.3× the White, non-Hispanic rate.",equity:"Hispanic adults sit 56.6 percentage points from the highest-performing group (Asian, 73.8%)."}
+  },
+  {
+    num:3, name:"Health Care Access and Quality", short:"Health Care Access",
+    indicator:"Uninsured Rates (%), a lower percentage is better", phrase:"uninsured rate is 6.9%",
+    min:0, max:20, ticks:[0,5,10,15,20], fmt:v=>v.toFixed(1)+"%",
+    county:6.9,
+    benchmark:{v:4.0, big:"6.9% <span class=\"vs\">vs.</span> 4.0%", note:"Lake County vs. Alameda County benchmark."},
+    equity:{hpg:"White, non-Hispanic", hpgV:2.9, worst:"Hispanic", worstV:16.6, gapLabel:"Hispanic vs highest-performing group", big:"13.7 <span class=\"unit\">percentage-point gap (ppg)</span>", chart:"13.7 percentage-point gap",
+            note:"Hispanic residents vs the highest-performing group. Alameda's gap: 6.3 percentage points."},
+    pairwise:{aL:"White, non-Hispanic", aV:2.9, bL:"Hispanic", bV:16.6, big:"5.7×",
+            note:"Uninsured: Hispanic residents 5.7× as likely."},
+    caps:{benchmark:"Lake County 6.9%, Alameda County 4.0%. Lake County is 2.9 percentage points higher, a rate ratio of 1.73.",pairwise:"Hispanic residents are 5.7× as likely to lack health insurance as White, non-Hispanic residents.",equity:"Hispanic residents sit 13.7 percentage points from the highest-performing group (White, non-Hispanic, 2.9%)."}
+  },
+  {
+    num:4, name:"Social and Community Context", short:"Social & Community",
+    indicator:"Limited English Proficiency (%), a lower percentage is better", phrase:"limited English proficiency rate is 10.6%",
+    min:0, max:32, ticks:[0,10,20,30], fmt:v=>v.toFixed(1)+"%",
+    county:10.6,
+    benchmark:{v:17.8, big:"10.6% <span class=\"vs\">vs.</span> 17.8%", note:"Lake County vs. Alameda County benchmark."},
+    equity:{hpg:"White, non-Hispanic", hpgV:2.6, worst:"Hispanic", worstV:29.8, gapLabel:"Hispanic vs highest-performing group", big:"27.3 <span class=\"unit\">percentage-point gap (ppg)</span>", chart:"27.3 percentage-point gap",
+            note:"Hispanic residents vs the highest-performing group. Alameda's gap: 26.1 percentage points."},
+    pairwise:{aL:"White, non-Hispanic", aV:2.6, bL:"Hispanic", bV:29.8, big:"11.5×",
+            note:"Language: Hispanic residents 11.5× as likely."},
+    caps:{benchmark:"Lake County 10.6%, Alameda County 17.8%. Lake County is 7.1 percentage points lower.",pairwise:"Hispanic residents are 11.5× as likely to have limited English proficiency as White, non-Hispanic residents.",equity:"Hispanic residents sit 27.3 percentage points from the highest-performing group (White, non-Hispanic, 2.6%)."}
+  },
+  {
+    num:5, name:"Neighborhood and Built Environment", short:"Neighborhood",
+    indicator:"Broadband Access (%), a higher percentage is better", phrase:"broadband subscription rate is 94.3%",
+    min:90, max:100, ticks:[90,92,94,96,98,100], fmt:v=>v.toFixed(1)+"%",
+    county:94.3,
+    benchmark:{v:94.4, big:"94.3% <span class=\"vs\">vs.</span> 94.4%", note:"Lake County vs. Alameda County benchmark."},
+    equity:{hpg:"Asian", hpgV:98.3, worst:"Black", worstV:92.2, gapLabel:"Black vs highest-performing group", big:"6.1 <span class=\"unit\">percentage-point gap (ppg)</span>", chart:"6.1 percentage-point gap",
+            note:"Black vs the highest-performing group. Alameda's gap: 6.3 percentage points."},
+    pairwise:{aL:"Black", aV:92.2, bL:"White, non-Hispanic", bV:96.1, big:"0.96×",
+            note:"Broadband: similar proportions."},
+    caps:{benchmark:"Lake County 94.3%, Alameda County 94.4%. Lake County is 0.1 percentage points lower.",pairwise:"Black households subscribe to broadband at 0.96× the White, non-Hispanic rate.",equity:"Black households sit 6.1 percentage points from the highest-performing group (Asian, 98.3%)."}
+  }
+];
+
+const LENSES = ["benchmark","pairwise","equity"];
+const on = {pairwise:false, equity:false, benchmark:false};
+let cur = 0;
+const L=70, R=740, AXIS=185;
+const svg = document.getElementById("chart");
+const x = d => v => L + (v - d.min)/(d.max - d.min) * (R - L);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const anchorFor = px => px < L+55 ? "start" : px > R-55 ? "end" : "middle";
+const nudge = px => px < L+55 ? px-6 : px > R-55 ? px+6 : px;
+
+function draw(){
+  const d = DOMAINS[cur], X = x(d);
+  let s = "";
+
+  s += `<line x1="${L}" y1="${AXIS}" x2="${R}" y2="${AXIS}" stroke="var(--ink)" stroke-width="2.5"/>`;
+  s += `<line x1="${L}" y1="${AXIS-9}" x2="${L}" y2="${AXIS+9}" stroke="var(--ink)" stroke-width="2.5"/>`;
+  s += `<line x1="${R}" y1="${AXIS-9}" x2="${R}" y2="${AXIS+9}" stroke="var(--ink)" stroke-width="2.5"/>`;
+  d.ticks.forEach(t=>{
+    const px = X(t);
+    s += `<line x1="${px}" y1="${AXIS}" x2="${px}" y2="${AXIS+7}" stroke="var(--rule)" stroke-width="2"/>`;
+    s += `<text x="${px}" y="${AXIS+24}" text-anchor="middle" font-family="Arimo, Arial, sans-serif" font-size="12" fill="var(--ink-soft)">${t}%</text>`;
+  });
+
+  const cx = X(d.county);
+  s += `<circle cx="${cx}" cy="${AXIS}" r="9" fill="var(--card)" stroke="var(--ink)" stroke-width="3.5"/>`;
+  s += `<text x="${nudge(cx)}" y="${AXIS-24}" text-anchor="${anchorFor(cx)}" font-family="Figtree, sans-serif" font-weight="900" font-size="19" fill="var(--ink)">LAKE COUNTY ${d.fmt(d.county)}</text>`;
+
+  let y = AXIS + 46;
+
+  if(on.benchmark){
+    const bx = X(d.benchmark.v);
+    s += `<path d="M ${bx} ${AXIS-13} l 3.6 7.9 8.6 1 -6.4 5.9 1.7 8.5 -7.5 -4.2 -7.5 4.2 1.7 -8.5 -6.4 -5.9 8.6 -1 Z" fill="var(--alameda)" stroke="var(--card)" stroke-width="1.4"/>`;
+    s += `<text x="${nudge(bx)}" y="${y}" text-anchor="${anchorFor(bx)}" font-family="Arimo, Arial, sans-serif" font-weight="600" font-size="14" fill="var(--alameda)">ALAMEDA ${d.fmt(d.benchmark.v)}</text>`;
+    const x1=Math.min(cx,bx), x2=Math.max(cx,bx);
+    s += `<path d="M ${x1} ${y+9} V ${y+17} H ${x2} V ${y+9}" fill="none" stroke="var(--alameda)" stroke-width="2.2"/>`;
+    s += `<text x="${(x1+x2)/2}" y="${y+36}" text-anchor="middle" font-family="Arimo, Arial, sans-serif" font-size="13" font-weight="600" fill="var(--alameda)">benchmark distance</text>`;
+    y += 56;
+  }
+
+  if(on.equity){
+    const gx = X(d.equity.hpgV), wx = X(d.equity.worstV);
+    s += `<path d="M ${gx} ${AXIS-11} l 8 11 -8 11 -8 -11 Z" fill="var(--orange)" stroke="var(--card)" stroke-width="1.4"/>`;
+    s += `<text x="${nudge(gx)}" y="${y}" text-anchor="${anchorFor(gx)}" font-family="Arimo, Arial, sans-serif" font-size="13" font-weight="600" fill="var(--orange)">Highest-performing group: ${esc(d.equity.hpg)} ${d.fmt(d.equity.hpgV)}</text>`;
+    const a=Math.min(gx,wx), b=Math.max(gx,wx);
+    s += `<path d="M ${a} ${y+9} V ${y+17} H ${b} V ${y+9}" fill="none" stroke="var(--orange)" stroke-width="2.2"/>`;
+    s += `<text x="${(a+b)/2}" y="${y+38}" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="900" font-size="15" fill="var(--orange)">${esc(d.equity.gapLabel)}: ${d.equity.chart}</text>`;
+    y += 58;
+  }
+
+  if(on.pairwise){
+    const ax = X(d.pairwise.aV), bx = X(d.pairwise.bV);
+    [[ax,d.pairwise.aL,d.pairwise.aV],[bx,d.pairwise.bL,d.pairwise.bV]].forEach(([px,lab,val])=>{
+      s += `<circle cx="${px}" cy="${AXIS}" r="7.5" fill="var(--lake)" stroke="var(--card)" stroke-width="1.6"/>`;
+      s += `<text x="${nudge(px)}" y="${AXIS-58}" text-anchor="${anchorFor(px)}" font-family="Arimo, Arial, sans-serif" font-weight="600" font-size="14" fill="var(--lake)">${esc(lab)} ${d.fmt(val)}</text>`;
+    });
+    const a=Math.min(ax,bx), b=Math.max(ax,bx);
+    s += `<path d="M ${a} ${AXIS-78} V ${AXIS-87} H ${b} V ${AXIS-78}" fill="none" stroke="var(--lake)" stroke-width="2.2"/>`;
+    s += `<text x="${(a+b)/2}" y="${AXIS-98}" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="900" font-size="18" fill="var(--lake)">${d.pairwise.big}</text>`;
+  }
+
+  svg.innerHTML = `<desc id="chart-desc">${esc(d.name)}: ${esc(d.indicator)}. Lake County ${d.fmt(d.county)}.</desc>` + s;
+
+  document.getElementById("pnum").textContent = d.num;
+  document.getElementById("pname").textContent = d.name;
+  document.getElementById("pind").innerHTML = "<b>SDOH Indicator:</b> " + esc(d.indicator) + ".";
+  document.getElementById("pbadge").hidden = !d.widest;
+
+  const active = LENSES.filter(k=>on[k]);
+  document.getElementById("cap").innerHTML = active.length
+    ? active.map(k=>`<span class="cline" data-lens="${k}">${esc(d.caps[k])}</span>`).join("")
+      + `<span class="muted">Lake County average: ${d.fmt(d.county)}. Toggle views above to add or remove marks.</span>`
+    : `<span class="none">Lake County's ${esc(d.phrase)}. Choose a view above to compare it with a benchmark county or with subgroups within the county.</span>`;
+
+  LENSES.forEach(k=>{
+    const cell = document.getElementById("cell-"+k);
+    cell.classList.toggle("on", on[k]);
+    cell.querySelector(".big").innerHTML = on[k] ? d[k].big : "—";
+    cell.querySelector(".note").textContent = on[k] ? d[k].note : "";
+    document.getElementById("sheet-"+k).classList.toggle("on", on[k]);
+  });
+}
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const k = btn.dataset.lens;
+    on[k] = !on[k];
+    btn.setAttribute("aria-pressed", String(on[k]));
+    draw();
+  });
+});
+
+const nav = document.getElementById("domnav");
+DOMAINS.forEach((d,i)=>{
+  const b = document.createElement("button");
+  b.className = "dom";
+  b.innerHTML = `<span>${d.num}</span>${d.short}`;
+  b.setAttribute("aria-current", i===0 ? "true" : "false");
+  b.addEventListener("click",()=>{
+    cur = i;
+    nav.querySelectorAll(".dom").forEach((n,j)=>n.setAttribute("aria-current", String(j===i)));
+    draw();
+  });
+  nav.appendChild(b);
+});
+
+draw();
+
+// ---- poster lightbox ----
+const POSTER_FULL = "images/poster-full.jpg";
+(function(){
+  const box = document.getElementById("lightbox");
+  const img = document.getElementById("lbImg");
+  const closeBtn = document.getElementById("lbClose");
+  let lastFocus = null;
+
+  function open(){
+    lastFocus = document.activeElement;
+    if(!img.getAttribute("src")) img.src = POSTER_FULL;
+    box.setAttribute("open","");
+    box.classList.remove("zoomed");
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  }
+  function close(){
+    box.removeAttribute("open");
+    document.body.style.overflow = "";
+    if(lastFocus) lastFocus.focus();
+  }
+  ["posterBtn","posterBtn2"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("click", open);
+  });
+  closeBtn.addEventListener("click", close);
+  img.addEventListener("click", ()=> box.classList.toggle("zoomed"));
+  box.addEventListener("click", e=>{ if(e.target === box) close(); });
+  document.addEventListener("keydown", e=>{
+    if(e.key === "Escape" && box.hasAttribute("open")) close();
+  });
+})();
+</script>
+</body>
+</html>
