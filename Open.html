@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Open Scholarship Toolkit for SDOH data orientation, reproducible R workflows, Tableau learning, student examples, and open sharing.">
+<title>Open Scholarship Toolkit | SDOH</title>
+<style>
+
+:root{
+  --navy:#173b5e;
+  --blue:#2d78a6;
+  --teal:#16948c;
+  --aqua:#46b8ba;
+  --gold:#e3a83a;
+  --ink:#203143;
+  --muted:#68788a;
+  --paper:#fff;
+  --soft:#f5f8fa;
+  --line:#dce5eb;
+  --shadow:0 16px 38px rgba(27,61,89,.12);
+  --radius:18px;
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  line-height:1.6;
+}
+a{color:var(--blue)}
+img{max-width:100%}
+.wrap{width:min(var(--max),calc(100% - 38px));margin:auto}
+.skip{position:absolute;left:-10000px}
+.skip:focus{left:14px;top:14px;background:#fff;padding:10px;z-index:999}
+
+/* Educational-template-style top bar */
+.topbar{background:var(--navy);color:#d9e7f1;font-size:.86rem}
+.topbar .wrap{min-height:34px;display:flex;align-items:center;justify-content:flex-start;gap:18px}
+.topbar strong{color:#fff}
+.site-header{
+  position:sticky;top:0;z-index:50;
+  background:#fff;border-bottom:1px solid var(--line);
+}
+.nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:11px;color:var(--ink);font-weight:850;text-decoration:none}
+.brand-icon{
+  width:44px;height:44px;border-radius:9px;display:grid;place-items:center;
+  color:#fff;background:linear-gradient(145deg,var(--blue),var(--teal));
+  font-size:.88rem;font-weight:950;letter-spacing:.04em
+}
+.navlinks{display:flex;align-items:center;gap:4px}
+.navlinks a{padding:10px 12px;color:#3b4b5d;text-decoration:none;font-weight:700;font-size:.91rem;border-radius:7px}
+.navlinks a:hover{background:#eef5f8;color:var(--navy)}
+.menu{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 11px}
+
+/* Hero inspired by the education template's featured-course banner */
+.hero{
+  background:
+    linear-gradient(120deg,rgba(23,59,94,.96),rgba(45,120,166,.89) 52%,rgba(22,148,140,.84)),
+    radial-gradient(circle at 80% 30%,#5dc7cb,transparent 36%);
+  color:#fff;
+}
+.hero-grid{display:grid;grid-template-columns:1.18fr .82fr;gap:48px;align-items:center;padding:82px 0}
+.eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;font-weight:900;color:var(--teal)}
+.hero .eyebrow{color:#baf2ec}
+h1,h2,h3{line-height:1.12}
+h1{font-size:clamp(2.8rem,6.8vw,5.35rem);letter-spacing:-.045em;margin:14px 0 20px}
+h2{font-size:clamp(2rem,4.4vw,3.2rem);letter-spacing:-.035em;margin:8px 0 12px}
+h3{font-size:1.22rem;margin-top:0}
+.hero p{font-size:1.15rem;color:#e6f1f7;max-width:780px}
+.author-line{margin-top:8px;color:#d7edf3;font-size:.95rem;font-weight:700}
+.actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:27px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;min-height:46px;
+  padding:0 16px;border-radius:8px;border:1px solid var(--line);background:#fff;
+  color:var(--navy);font-weight:800;text-decoration:none
+}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#183047}
+.btn.outline{background:transparent;border-color:rgba(255,255,255,.65);color:#fff}
+.btn.disabled{background:#f1f3f5;color:#7f8994;border-color:#e1e5e8;cursor:default}
+.hero-panel{
+  background:rgba(255,255,255,.97);color:var(--ink);
+  border-radius:16px;padding:24px;box-shadow:var(--shadow)
+}
+.fact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{padding:16px;border-radius:10px;background:var(--soft);border:1px solid var(--line)}
+.fact strong{display:block;font-size:1.7rem;color:var(--navy);line-height:1}
+.fact span{font-size:.84rem;color:var(--muted)}
+.hero-panel .note{margin-top:12px;padding:14px;background:#e7f5f2;border-left:4px solid var(--teal);font-size:.9rem}
+
+.section{padding:78px 0}
+.alt{background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.section-head{text-align:center;max-width:800px;margin:0 auto 35px}
+.section-head p{color:var(--muted);font-size:1.03rem}
+
+/* Three course boxes: directly applies educational-template pattern */
+.parts{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.part{
+  position:relative;background:#fff;border:1px solid var(--line);
+  border-radius:var(--radius);padding:26px 24px 24px;box-shadow:0 8px 25px rgba(24,61,92,.06);
+  min-height:385px;display:flex;flex-direction:column
+}
+.part:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:18px 18px 0 0;background:var(--blue)}
+.part:nth-child(2):before{background:var(--gold)}
+.part:nth-child(3):before{background:var(--teal)}
+.part-icon{
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;
+  margin:2px auto 16px;color:#fff;background:var(--blue);font-size:1.35rem;font-weight:950
+}
+.part:nth-child(2) .part-icon{background:var(--gold);color:#17334b}
+.part:nth-child(3) .part-icon{background:var(--teal)}
+.part h3{text-align:center;font-size:1.45rem}
+.part .part-label{text-align:center;color:var(--blue);font-size:.76rem;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
+.part p{color:var(--muted)}
+.part ul{color:#566779;padding-left:20px}
+.part .bottom{margin-top:auto;text-align:center}
+.part .bottom .actions{justify-content:center}
+
+.video-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.video-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 25px rgba(24,61,92,.06)}
+.video-frame{position:relative;padding-top:56.25%;background:#0d1e2b}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video-meta{padding:17px 19px}
+.video-meta h3{margin-bottom:5px}
+.video-meta p{margin:0;color:var(--muted);font-size:.91rem}
+.video-badge{display:inline-block;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;font-weight:900;color:var(--teal);margin-bottom:5px}
+
+/* Portfolio-style student showcase, adapted from the template collection */
+.showcase-grid{display:grid;grid-template-columns:1fr;gap:36px;width:100%;max-width:none;margin:0}
+.showcase{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.showcase-title{padding:20px 21px;border-bottom:1px solid var(--line)}
+.showcase-title .eyebrow{color:var(--blue)}
+.showcase-title h3{margin:4px 0 5px}
+.showcase-title p{margin:0;color:var(--muted);font-size:.92rem}
+.tableau-shell{padding:0;background:#edf2f5}
+.tableau-shell.square{aspect-ratio:1 / 1}
+.tableau-shell.square .tableauPlaceholder{width:100%;height:100%}
+.tableau-shell.square .tableauViz{width:100% !important;height:100% !important}
+.tableau-shell.square iframe{width:100%;height:100%;border:0;display:block}
+.tableau-shell.square .tableau-placeholder{min-height:0;height:100%}
+.showcase .actions{padding:0 20px;margin:18px 0 0}
+.showcase .frame{
+  position:relative;
+  width:100%;
+  max-width:100%;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  border-left:0;
+  border-right:0;
+  border-radius:0;
+  overflow:hidden;
+  background:#fff;
+  margin:18px 0 0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+.showcase .frame iframe{
+  width:min(1000px,100%);
+  aspect-ratio:1000 / 827;
+  height:auto;
+  border:0;
+  display:block;
+  margin:0 auto;
+}
+.tableau-placeholder{
+  min-height:510px;border:2px dashed #b9c8d2;border-radius:10px;background:#fff;
+  display:grid;place-items:center;text-align:center;color:var(--muted);padding:28px
+}
+.tableau-placeholder strong{display:block;color:var(--navy);font-size:1.05rem}
+.tableau-placeholder code{display:block;margin-top:10px;font-size:.78rem;word-break:break-word}
+.showcase-foot{padding:15px 20px;border-top:1px solid var(--line);font-size:.88rem;color:var(--muted)}
+
+.workflow{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
+.step{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px}
+.step b{display:block;color:var(--teal);font-size:.75rem;letter-spacing:.1em;margin-bottom:5px}
+.step strong{display:block}
+.step span{display:block;color:var(--muted);font-size:.83rem;margin-top:4px}
+.fair{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.fair-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}
+.fair-letter{font-size:2rem;font-weight:950;color:var(--teal);line-height:1}
+.resource-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.resource{background:#fff;border:1px solid var(--line);border-radius:12px;padding:21px;min-height:190px;display:flex;flex-direction:column}
+.resource p{color:var(--muted)}
+.resource .bottom{margin-top:auto}
+.notice{margin-top:20px;padding:16px 18px;border-radius:9px;background:#fff8df;border:1px solid #ead69b;color:#66501c}
+
+footer{background:#102a40;color:#dae6ed}
+.footer-grid{display:grid;grid-template-columns:1.35fr .8fr .8fr;gap:30px;padding:44px 0}
+footer a{color:#dce9f0}
+footer p{color:#aebdca}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;color:#9bafbd;font-size:.85rem}
+
+@media(max-width:980px){
+  .hero-grid{grid-template-columns:1fr}
+  .parts,.resource-grid{grid-template-columns:1fr}
+  .showcase-grid{grid-template-columns:1fr}
+  .workflow{grid-template-columns:1fr 1fr}
+  .fair{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .showcase .frame iframe{width:100%;aspect-ratio:1000 / 827}
+  .wrap{width:min(var(--max),calc(100% - 28px))}
+  .topbar{display:none}
+  .menu{display:block}
+  .navlinks{display:none;position:absolute;left:14px;right:14px;top:66px;flex-direction:column;align-items:stretch;padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+  .navlinks.open{display:flex}
+  .navlinks a{padding:12px}
+  .video-grid,.workflow,.fair,.footer-grid{grid-template-columns:1fr}
+  .section{padding:60px 0}
+  h1{font-size:2.7rem}
+}
+
+
+  .back-to-top{
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    border:0;
+    background:var(--navy);
+    color:#fff;
+    font-size:1.35rem;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(23,59,94,.22);
+    cursor:pointer;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(8px);
+    transition:opacity .2s ease, transform .2s ease, visibility .2s ease, background .2s ease;
+    z-index:1200;
+  }
+  .back-to-top:hover{background:var(--teal)}
+  .back-to-top.show{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+  }
+  .back-to-top:focus-visible{
+    outline:3px solid rgba(70,184,186,.45);
+    outline-offset:3px;
+  }
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="brand-icon">OS</span><span>Open Scholarship Toolkit</span></a>
+    <button class="menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="navlinks">
+      <a href="#parts">Learn</a>
+      <a href="#videos">Videos</a>
+      <a href="#showcase">Student Showcase</a>
+      <a href="#open">Open Scholarship</a>
+      <a href="#resources">Resources</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Learn · reproduce · share</div>
+      <div class="author-line">Created by Brian Chen</div>
+      <h1>Open scholarship, from data to public impact.</h1>
+      <p>Learn how to work with social determinants of health data, build a reproducible analysis in R, create interactive Tableau visualizations, and share your work openly.</p>
+      <div class="actions">
+        <a class="btn primary" href="#parts">Start Learning</a>
+        <a class="btn outline" href="#videos">Watch Videos</a>
+        <a class="btn outline" href="#showcase">View Student Work</a>
+      </div>
+    </div>
+    <aside class="hero-panel">
+      <h3>Toolkit at a glance</h3>
+      <div class="fact-grid">
+        <div class="fact"><strong>3</strong><span>connected toolkit parts</span></div>
+        <div class="fact"><strong>9</strong><span>unique public data sources</span></div>
+        <div class="fact"><strong>7</strong><span>numbered R scripts</span></div>
+        <div class="fact"><strong>FAIR</strong><span>open scholarship framework</span></div>
+      </div>
+      <div class="note"><strong>End product:</strong> a public Tableau dashboard, a reproducible project repository, and openly shared research materials.</div>
+    </aside>
+  </div>
+</section>
+
+<section class="section" id="parts">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Learn with the Toolkit</h2>
+      <p>Move through three connected modules, from understanding the data to analyzing it and sharing your work openly.</p>
+    </div>
+
+    <div class="parts">
+      <article class="part">
+        <div class="part-label">Part 1 of 3</div>
+        <div class="part-icon">01</div>
+        <h3>Data Orientation</h3>
+        <p>Learn how social determinants of health are organized, explore the public datasets available for research, and understand how geographic data can be linked using FIPS codes.</p>
+        <ul>
+          <li>Healthy People 2030 SDOH domains</li>
+          <li>Public data sources</li>
+          <li>Geographic identifiers and FIPS</li>
+          <li>Open scholarship principles</li>
+        </ul>
+        <div class="bottom"><a class="btn" href="https://github.com/GSphd312/sdoh_toolkit/blob/main/toolkit/Open_Scholarship_Toolkit_Part_1_Data_Orientation.pdf" target="_blank" rel="noopener noreferrer">View Part 1 PDF</a></div>
+      </article>
+
+      <article class="part">
+        <div class="part-label">Part 2 of 3</div>
+        <div class="part-icon">02</div>
+        <h3>Download & R Workflow</h3>
+        <p>Build a reproducible R project by downloading, cleaning, documenting, merging, and analyzing public health data.</p>
+        <ul>
+          <li>Download and preserve source data</li>
+          <li>Clean and standardize data in R</li>
+          <li>Create a master analysis dataset</li>
+          <li>Run and document your analysis</li>
+        </ul>
+        <div class="bottom">
+          <div class="actions">
+            <a class="btn" href="https://github.com/GSphd312/sdoh_toolkit/blob/main/toolkit/Open_Scholarship_Toolkit_Part_2_Download_R_Workflow.pdf" target="_blank" rel="noopener noreferrer">View Part 2 PDF</a>
+            <a class="btn" href="https://github.com/GSphd312/sdoh_toolkit" target="_blank" rel="noopener noreferrer">Open GitHub Project</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="part">
+        <div class="part-label">Part 3 of 3</div>
+        <div class="part-icon">03</div>
+        <h3>Tableau & Open Sharing</h3>
+        <p>Turn your analysis into an interactive Tableau project, then publish your code, data, and documentation so others can find and reuse your work.</p>
+        <ul>
+          <li>Maps and interactive dashboards</li>
+          <li>Tableau stories</li>
+          <li>GitHub repository</li>
+          <li>GitHub, repositories, and open sharing</li>
+        </ul>
+        <div class="bottom">
+          <div class="actions">
+            <a class="btn" href="https://github.com/GSphd312/sdoh_toolkit/blob/main/toolkit/Open_Scholarship_Toolkit_Part_3_Tableau_Repository_Open_Sharing.pdf" target="_blank" rel="noopener noreferrer">View Part 3 PDF</a>
+            <a class="btn" href="#videos">Watch Videos</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="videos">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Video Learning Library</h2>
+      <p>Watch the demonstrations as you work through the toolkit. Each video focuses on a specific step, from building maps to publishing and sharing your final project.</p>
+    </div>
+
+    <div class="video-grid">
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/AbwaK3OpDTQ" title="Access Tableau" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Getting started</span>
+          <h3>Access Tableau</h3>
+          <p>Create or sign in to Tableau Public and access the web authoring environment.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/tlnezt39FOY" title="Connect Your Data" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Getting started</span>
+          <h3>Connect Your Data</h3>
+          <p>Upload and connect the prepared project data to Tableau Public.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/TO44d2OpadI" title="All Maps - Asset Maps" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Mapping</span>
+          <h3>All Maps: Asset Maps</h3>
+          <p>Reference mapping for geographic units and community-resource locations.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/TO44d2OpadI?start=308" title="All Maps - Thematic Maps" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Mapping</span>
+          <h3>All Maps: Thematic Maps</h3>
+          <p>The same toolkit video, opened at the thematic-mapping section referenced in the document.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/5QKP3iuYFpQ" title="Assemble Your Dashboard" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Dashboard</span>
+          <h3>Assemble Your Dashboard</h3>
+          <p>Combine coordinated maps and charts into an interactive dashboard canvas.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/qYO2JXDDAkM" title="Story Map" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Narrative</span>
+          <h3>Story Map</h3>
+          <p>Arrange views into a guided research narrative with multiple story points.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/mJqrJMbG4P8" title="Adapt and Share" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Sharing</span>
+          <h3>Adapt and Share</h3>
+          <p>Adapt an existing project and publish or share the resulting Tableau work.</p>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="video-frame">
+          <iframe src="https://www.youtube.com/embed/1pI4QU-7c98" title="How to Make Your GitHub Code Citable with Zenodo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="video-meta">
+          <span class="video-badge">Open scholarship</span>
+          <h3>Make GitHub Citable with Zenodo</h3>
+          <p>pyOpenSci conceptual video on connecting a GitHub release to Zenodo for a DOI.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="showcase">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Student Showcase</h2>
+      <p>Student fellows apply the toolkit to build reproducible workflows and Tableau visualizations. Selected projects are featured here as part of the Open Scholarship Example Library.</p>
+    </div>
+
+    <div class="showcase-grid">
+      <article class="showcase">
+        <div class="showcase-title">
+          <div class="eyebrow">Featured student example 01</div>
+          <h3>Student-Created Tableau Dashboard</h3>
+          <p>Created using the Open Scholarship Toolkit.</p>
+        </div>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener"
+            href="https://public.tableau.com/views/SDOHToolkitILDashboard_17799849428330/Dashboard1?:showVizHome=no">Open in new tab</a>
+          <button class="btn" type="button"
+            onclick="document.getElementById('studentViz1').src=document.getElementById('studentViz1').src">Reload</button>
+        </div>
+        <div class="frame">
+          <iframe id="studentViz1"
+            title="Student-Created Tableau Dashboard"
+            loading="lazy"
+            src="https://public.tableau.com/views/SDOHToolkitILDashboard_17799849428330/Dashboard1?:embed=y&:showVizHome=no">
+          </iframe>
+        </div>
+        <div class="showcase-foot">Explore an interactive dashboard created using the Open Scholarship Toolkit.</div>
+      </article>
+
+      <article class="showcase">
+        <div class="showcase-title">
+          <div class="eyebrow">Featured student example 02</div>
+          <h3>Student-Created Tableau Dashboard</h3>
+          <p>Created using the Open Scholarship Toolkit.</p>
+        </div>
+        <div class="tableau-shell square">
+          <div class="tableau-placeholder">
+            <div>
+              <strong>Interactive Tableau dashboard</strong>
+              <span>Student-created example coming soon.</span>
+            </div>
+          </div>
+        </div>
+        <div class="showcase-foot">Explore an interactive dashboard created using the Open Scholarship Toolkit.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>From Research Question to Open Scholarship</h2>
+      <p>Follow a consistent workflow from choosing a research question to publishing a reproducible, citable project.</p>
+    </div>
+    <div class="workflow">
+      <div class="step"><b>STEP 1</b><strong>Ask a Question</strong><span>Choose an SDOH topic, location, population, and outcome.</span></div>
+      <div class="step"><b>STEP 2</b><strong>Get the Data</strong><span>Download public data and document its source and date.</span></div>
+      <div class="step"><b>STEP 3</b><strong>Analyze in R</strong><span>Clean, merge, analyze, and document your workflow.</span></div>
+      <div class="step"><b>STEP 4</b><strong>Visualize in Tableau</strong><span>Build maps and interactive views that communicate your findings.</span></div>
+      <div class="step"><b>STEP 5</b><strong>Share & Cite</strong><span>Publish your project through GitHub and use appropriate open repositories or sharing platforms for access, reuse, and citation.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="open">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Open Scholarship in Practice</h2>
+      <p>Build research that others can find, access, understand, reproduce, and reuse.</p>
+    </div>
+    <div class="fair">
+      <div class="fair-card"><div class="fair-letter">F</div><h3>Findable</h3><p>Make your work discoverable through GitHub and, when appropriate, a repository record or persistent identifier.</p></div>
+      <div class="fair-card"><div class="fair-letter">A</div><h3>Accessible</h3><p>Share data, code, and visualizations through openly accessible platforms and formats.</p></div>
+      <div class="fair-card"><div class="fair-letter">I</div><h3>Interoperable</h3><p>Use standard identifiers, consistent variables, and open file formats.</p></div>
+      <div class="fair-card"><div class="fair-letter">R</div><h3>Reusable</h3><p>Document your code, data sources, methods, and project files so others can build on your work.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="resources">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Toolkit Resources</h2>
+      <p>Access the complete learning toolkit and the reproducible project resources that support the learning experience.</p>
+    </div>
+    <div class="resource-grid">
+      <article class="resource">
+        <h3>Complete Toolkit</h3>
+        <p>View all three parts together, including the full table of contents and the complete learning sequence.</p>
+        <div class="bottom"><a class="btn" href="https://github.com/GSphd312/sdoh_toolkit/tree/main/toolkit" target="_blank" rel="noopener noreferrer">Open Toolkit Folder</a></div>
+      </article>
+
+      <article class="resource">
+        <h3>GitHub Project</h3>
+        <p>Explore the R scripts, documentation, project data, data dictionary, and reproducible workflow when the public repository is released.</p>
+        <div class="bottom"><a class="btn" href="https://github.com/GSphd312/sdoh_toolkit" target="_blank" rel="noopener noreferrer">Open GitHub Project</a></div>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div><strong>Open Scholarship Toolkit</strong><p>Brian Chen<br>Learn · Reproduce · Share</p></div>
+    <div><strong>Learning</strong><p><a href="#parts">Three parts</a><br><a href="#videos">Video library</a><br><a href="#showcase">Student showcase</a></p></div>
+    <div><strong>Project</strong><p>Public learning materials, student examples, and reproducible project resources.</p></div>
+  </div>
+  <div class="wrap footer-bottom">Open Scholarship Toolkit · Brian Chen</div>
+</footer>
+
+<script>
+
+const button = document.querySelector('.menu');
+const nav = document.querySelector('.navlinks');
+if (button && nav) {
+  button.addEventListener('click', () => {
+    const isOpen = nav.classList.toggle('open');
+    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    nav.classList.remove('open');
+    button.setAttribute('aria-expanded','false');
+  }));
+}
+
+</script>
+
+<button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
+
+
+<script>
+  const backToTop = document.getElementById('backToTop');
+  if (backToTop) {
+    const toggleBackToTop = () => {
+      backToTop.classList.toggle('show', window.scrollY > 500);
+    };
+    window.addEventListener('scroll', toggleBackToTop, { passive: true });
+    toggleBackToTop();
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+</body>
+</html>
