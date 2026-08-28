@@ -490,18 +490,23 @@ footer p{color:#aebdca}
       <article class="showcase">
         <div class="showcase-title">
           <div class="eyebrow">Featured student example 02</div>
-          <h3>Student-Created Tableau Dashboard</h3>
+          <h3>Indiana Healthcare Access Dashboard</h3>
           <p>Created using the Open Scholarship Toolkit.</p>
         </div>
-        <div class="tableau-shell square">
-          <div class="tableau-placeholder">
-            <div>
-              <strong>Interactive Tableau dashboard</strong>
-              <span>Student-created example coming soon.</span>
-            </div>
-          </div>
+        <div class="actions">
+          <a class="btn" target="_blank" rel="noopener"
+            href="https://public.tableau.com/views/IndianaHealthcareAccessDashboard/IndianaHealthcareAccessDashboard?:showVizHome=no">Open in new tab</a>
+          <button class="btn" type="button"
+            onclick="document.getElementById('studentViz2').src=document.getElementById('studentViz2').src">Reload</button>
         </div>
-        <div class="showcase-foot">Explore an interactive dashboard created using the Open Scholarship Toolkit.</div>
+        <div class="frame">
+          <iframe id="studentViz2"
+            title="Indiana Healthcare Access Dashboard"
+            loading="lazy"
+            src="https://public.tableau.com/views/IndianaHealthcareAccessDashboard/IndianaHealthcareAccessDashboard?:embed=y&:showVizHome=no">
+          </iframe>
+        </div>
+        <div class="showcase-foot">Explore an interactive Indiana health equity and healthcare access dashboard created using the Open Scholarship Toolkit.</div>
       </article>
     </div>
   </div>
