@@ -12,18 +12,35 @@
   <link rel="stylesheet" href="css/style.css">
 
 <style>
-  /* Feature the newest student example across the full showcase grid. */
+  /* Feature the newest student example across the full showcase grid,
+     with project information on the left and the Tableau preview on the right. */
   .portfolio-projects .portfolio-project-featured {
     grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .portfolio-projects .portfolio-project-featured .portfolio-project-content {
+    min-width: 0;
+  }
+  .portfolio-projects .portfolio-project-featured .dashboard-preview {
+    margin: 0;
+    min-width: 0;
   }
   .portfolio-projects .portfolio-project-featured .dashboard-preview img {
     width: 100%;
     height: auto;
     display: block;
   }
+  .portfolio-projects .portfolio-project-featured .portfolio-project-actions {
+    margin-top: 20px;
+  }
   @media (max-width: 767.98px) {
     .portfolio-projects .portfolio-project-featured {
       grid-column: auto;
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
   }
 </style>
@@ -269,12 +286,18 @@
       </article>
 
       <article class="portfolio-project portfolio-project-featured">
-        <header class="portfolio-project-header">
-          <small>Featured student example 05</small>
-          <h3>California Diabetes Burden &amp; Population Scale</h3>
-          <p><strong>Research question:</strong> How are county-level social determinants of health, particularly educational attainment and uninsured rates, associated with diabetes prevalence across California's 58 counties?</p>
-          <div class="project-links"><a href="https://www.census.gov/programs-surveys/acs" target="_blank" rel="noopener">ACS</a><a href="https://www.cdc.gov/places/" target="_blank" rel="noopener">CDC PLACES</a><a href="https://public.tableau.com/views/CaliforniaDiabetesBurdenPopulationScale/Dashboard1?:showVizHome=no" target="_blank" rel="noopener">Tableau Dashboard</a><a href="https://github.com/GSphd312/sdoh_toolkit/blob/main/student_showcase/05_CA_Dashboard_Demo-main.zip" target="_blank" rel="noopener">Project files</a><a href="https://doi.org/10.5281/zenodo.22985513" target="_blank" rel="noopener">Zenodo DOI</a></div>
-        </header>
+        <div class="portfolio-project-content">
+          <header class="portfolio-project-header">
+            <small>Featured student example 05</small>
+            <h3>California Diabetes Burden &amp; Population Scale</h3>
+            <p><strong>Research question:</strong> How are county-level social determinants of health, particularly educational attainment and uninsured rates, associated with diabetes prevalence across California's 58 counties?</p>
+            <div class="project-links"><a href="https://www.census.gov/programs-surveys/acs" target="_blank" rel="noopener">ACS</a><a href="https://www.cdc.gov/places/" target="_blank" rel="noopener">CDC PLACES</a><a href="https://github.com/GSphd312/sdoh_toolkit/blob/main/student_showcase/05_CA_Dashboard_Demo-main.zip" target="_blank" rel="noopener">Project files</a></div>
+          </header>
+
+          <div class="portfolio-project-actions">
+            <p>Explore how diabetes prevalence varies across California counties and how educational attainment and insurance coverage relate to that burden.</p>
+          </div>
+        </div>
 
         <a class="dashboard-preview"
            href="https://public.tableau.com/views/CaliforniaDiabetesBurdenPopulationScale/Dashboard1?:showVizHome=no"
@@ -284,10 +307,6 @@
           <img src="https://public.tableau.com/static/images/Ca/CaliforniaDiabetesBurdenPopulationScale/Dashboard1/1.png" loading="lazy" alt="Preview of the California Diabetes Burden and Population Scale dashboard">
           <span class="dashboard-preview-label">Open Interactive Dashboard</span>
         </a>
-
-        <div class="portfolio-project-actions">
-          <p>Explore how diabetes prevalence varies across California counties and how educational attainment and insurance coverage relate to that burden.</p>
-        </div>
       </article>
 
 
