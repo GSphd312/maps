@@ -70,41 +70,43 @@
 
   /* Funding acknowledgement */
   .funding-section {
-    padding: 46px 0;
+    padding: 36px 0;
     border-top: 1px solid rgba(0,0,0,.08);
   }
 
   .funding-wrap {
     display: grid;
-    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-    gap: 34px;
+    grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+    gap: 30px;
     align-items: center;
   }
 
   .funding-logo {
     width: 100%;
-    max-width: 220px;
+    max-width: 210px;
     height: auto;
     display: block;
   }
 
-  .funding-copy h2 {
-    margin-bottom: 10px;
-  }
-
   .funding-copy p {
     margin: 0;
-    max-width: 680px;
+    max-width: 760px;
+    font-size: 19px;
+    line-height: 1.55;
   }
 
   @media (max-width: 767.98px) {
     .funding-wrap {
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 18px;
     }
 
     .funding-logo {
-      max-width: 180px;
+      max-width: 175px;
+    }
+
+    .funding-copy p {
+      font-size: 17px;
     }
   }
 
@@ -424,9 +426,7 @@
         <img class="funding-logo" src="images/orca-logo.webp" alt="Open Research Community Accelerator logo">
       </div>
       <div class="funding-copy">
-        <div class="section-kicker">Project Support</div>
-        <h2>Funded by the Open Research Community Accelerator</h2>
-        <p>This project was funded by the Open Research Community Accelerator (ORCA).</p>
+        <p>This project has been made possible in part by grant 2024-349547 from the Chan Zuckerberg Initiative DAF, an advised fund of the Silicon Valley Community Foundation.</p>
       </div>
     </div>
   </div>
