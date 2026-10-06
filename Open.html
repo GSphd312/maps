@@ -10,6 +10,23 @@
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="css/style.css">
+
+<style>
+  /* Feature the newest student example across the full showcase grid. */
+  .portfolio-projects .portfolio-project-featured {
+    grid-column: 1 / -1;
+  }
+  .portfolio-projects .portfolio-project-featured .dashboard-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  @media (max-width: 767.98px) {
+    .portfolio-projects .portfolio-project-featured {
+      grid-column: auto;
+    }
+  }
+</style>
 </head>
 <body>
 
@@ -158,7 +175,7 @@
         <div class="section-kicker">Student Showcase</div>
         <h2>Open Scholarship Example Library</h2>
       </div>
-      <p>Student fellows apply the toolkit to build reproducible workflows and Tableau visualizations. Each project is shown as a dashboard screenshot preview in a two-column gallery. Open the full interactive dashboard when you want to explore the maps, charts, filters, and details.</p>
+      <p>Student fellows apply the toolkit to build reproducible workflows and Tableau visualizations. Projects are shown as dashboard screenshot previews, with the newest featured example highlighted in a full-width row. Open the full interactive dashboard when you want to explore the maps, charts, filters, and details.</p>
     </div>
 
     <div class="portfolio-projects">
@@ -251,7 +268,7 @@
         </div>
       </article>
 
-      <article class="portfolio-project">
+      <article class="portfolio-project portfolio-project-featured">
         <header class="portfolio-project-header">
           <small>Featured student example 05</small>
           <h3>California Diabetes Burden &amp; Population Scale</h3>
@@ -264,7 +281,7 @@
            target="_blank"
            rel="noopener"
            aria-label="Open interactive dashboard: California Diabetes Burden &amp; Population Scale">
-          <img src="images/california_diabetes_burden_population_scale.png" loading="lazy" alt="Preview of the California Diabetes Burden and Population Scale dashboard">
+          <img src="https://public.tableau.com/static/images/Ca/CaliforniaDiabetesBurdenPopulationScale/Dashboard1/1.png" loading="lazy" alt="Preview of the California Diabetes Burden and Population Scale dashboard">
           <span class="dashboard-preview-label">Open Interactive Dashboard</span>
         </a>
 
