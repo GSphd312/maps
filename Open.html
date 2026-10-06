@@ -15,18 +15,24 @@
   /* Feature the newest student example across the full showcase grid,
      with project information on the left and the Tableau preview on the right. */
   .portfolio-projects .portfolio-project-featured {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 32px;
-    align-items: start;
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.35fr) !important;
+    column-gap: 36px !important;
+    row-gap: 0 !important;
+    align-items: start !important;
   }
   .portfolio-projects .portfolio-project-featured .portfolio-project-content {
     min-width: 0;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
   }
   .portfolio-projects .portfolio-project-featured .dashboard-preview {
-    margin: 0;
+    margin: 0 !important;
     min-width: 0;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: start;
   }
   .portfolio-projects .portfolio-project-featured .dashboard-preview img {
     width: 100%;
@@ -38,9 +44,14 @@
   }
   @media (max-width: 767.98px) {
     .portfolio-projects .portfolio-project-featured {
-      grid-column: auto;
-      grid-template-columns: 1fr;
-      gap: 20px;
+      grid-column: auto !important;
+      grid-template-columns: 1fr !important;
+      row-gap: 20px !important;
+    }
+    .portfolio-projects .portfolio-project-featured .portfolio-project-content,
+    .portfolio-projects .portfolio-project-featured .dashboard-preview {
+      grid-column: 1 !important;
+      grid-row: auto !important;
     }
   }
 </style>
